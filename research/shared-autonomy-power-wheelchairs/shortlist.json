@@ -1,0 +1,374 @@
+{
+  "shortlist": [
+    {
+      "id": "javdani_2018_shared_autonomy_hindsight",
+      "title": "Shared autonomy via hindsight optimization for teleoperation and teaming",
+      "authors": ["Javdani, Shervin", "Admoni, Henny", "Pellegrinelli, Stefania", "Srinivasa, Siddhartha S.", "Bagnell, J. Andrew"],
+      "year": 2018,
+      "venue": "The International Journal of Robotics Research",
+      "doi": "10.1177/0278364918776060",
+      "url": "https://arxiv.org/abs/1706.00155",
+      "abstract": "In shared autonomy, a user and autonomous system work together to achieve shared goals. To collaborate effectively, the autonomous system must know the user's goal. Most prior works follow a predict-then-act model, first predicting the user's goal with high confidence, then assisting given that goal. Unfortunately, confidently predicting the user's goal may not be possible until they have nearly achieved it, causing predict-then-act methods to provide little assistance. The work formalizes shared autonomy as a Partially Observable Markov Decision Process (POMDP), providing assistance that minimizes the expected cost-to-go with an unknown goal. As solving this POMDP optimally is intractable, the authors use hindsight optimization to approximate. Applied to both shared-control teleoperation and human-robot teaming, compared with predict-then-act methods, the method achieves goals faster, requires less user input, decreases user idling time, and results in fewer user-robot collisions.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 5,
+        "recency": 3,
+        "citation_impact": 5,
+        "evidence_quality": 4
+      },
+      "total_score": 22,
+      "seminal": true,
+      "evaluator_note": "Foundational POMDP/hindsight-optimization shared autonomy framework published in the field's top journal (IJRR). The predict-then-act critique and goal-uncertainty formulation are directly cited across virtually all subsequent wheelchair shared-control work. Estimated 200+ citations. Seminal status confirmed."
+    },
+    {
+      "id": "erdogan_2017_robotic_wheelchair_control",
+      "title": "The effect of robotic wheelchair control paradigm and interface on user performance, effort and preference: An experimental assessment",
+      "authors": ["Erdogan, Ahmetcan", "Argall, Brenna D."],
+      "year": 2017,
+      "venue": "Robotics and Autonomous Systems",
+      "doi": "10.1016/j.robot.2017.04.013",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0921889016303670",
+      "abstract": "How control is distributed between a human operator and an autonomous system significantly impacts assistive robots designed to support individuals with severe motor impairments. Despite this importance, few comparative studies examine different control-sharing approaches in assistive robotics. This research presents a control design for a robotic smart wheelchair enabling flexible implementation and evaluation of multiple control-sharing methods. The authors implemented four control-sharing paradigms and conducted experiments comparing them against teleoperation using different control interfaces across multiple sessions. Key findings indicate that task performance varies by interface, performance improves with greater autonomy (though differences diminish at higher autonomy levels), and user effort decreases with increased autonomy assistance. The utilization of autonomy differs substantially across paradigms but not interfaces. Session 2 shows consistent performance improvements over Session 1. Subjective feedback reveals both convergences and divergences between individuals with spinal cord injury and uninjured participants. No single paradigm emerges as superior, suggesting multiple control options should accommodate individual user requirements.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 5,
+        "recency": 2,
+        "citation_impact": 3,
+        "evidence_quality": 5
+      },
+      "total_score": 20,
+      "seminal": false,
+      "evaluator_note": "One of the most rigorous comparative studies of shared-control paradigms in powered wheelchairs, including SCI participants across multiple sessions. Four paradigms tested against multiple interfaces. Directly answers how autonomy level affects effort, performance, and preference — a critical empirical contribution that is methodologically exemplary for the field."
+    },
+    {
+      "id": "aronson_2024_intentional_user_adaptation",
+      "title": "Intentional User Adaptation to Shared Control Assistance",
+      "authors": ["Aronson, Reuben M.", "Short, Elaine Schaertl"],
+      "year": 2024,
+      "venue": "ACM/IEEE International Conference on Human-Robot Interaction (HRI)",
+      "doi": "10.1145/3610977.3634953",
+      "url": "https://dl.acm.org/doi/10.1145/3610977.3634953",
+      "abstract": "This paper challenges the typical assumption in shared control approaches that user behavior remains constant despite assistance. Instead, it shows that users both change their control behavior when assistance is added and describe these changes as responses to the new system dynamics. In a computer-based bubble popping study, participants reported changing their strategies with different levels of assistance, and analysis of their actual control input validated this change. Additionally, the researchers conducted a public-space user study in which participants controlled a robot to pick up a cup despite the presence of assistance that directed them towards incorrect goals, yet participants still succeeded on the task despite the changes in dynamics introduced by the assistance. These results motivate further research in user-centered design and evaluation of assistive systems that treat the user as intentional.",
+      "scores": {
+        "relevance": 4,
+        "rigor": 4,
+        "recency": 5,
+        "citation_impact": 2,
+        "evidence_quality": 4
+      },
+      "total_score": 19,
+      "seminal": false,
+      "evaluator_note": "Very recent HRI 2024 paper (top venue) that challenges the static-user assumption ubiquitous in shared control literature. Two-study design (lab + field) validates that users strategically adapt behavior in response to assistance — directly relevant to wheelchair evaluation methodology and shared control algorithm design assumptions."
+    },
+    {
+      "id": "argall_2018_autonomy_rehab_robotics",
+      "title": "Autonomy in Rehabilitation Robotics: An Intersection",
+      "authors": ["Argall, Brenna D."],
+      "year": 2018,
+      "venue": "Annual Review of Control, Robotics, and Autonomous Systems",
+      "doi": "10.1146/annurev-control-061417-041727",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8313033/",
+      "abstract": "The paper examines how robotic systems with autonomous capabilities can be integrated into rehabilitation devices to help individuals with motor impairments. While rehabilitation robots exist for both therapeutic purposes and functional task replacement, they rarely incorporate autonomous decision-making. The author argues that robotics autonomy able to perceive the external world and reason about high-level control decisions could reduce operational demands on users, particularly those with severe impairments. The work surveys control challenges in prosthetics, wheelchairs, and robotic arms, then reviews research introducing autonomy to these systems. Key topics include shared-control paradigms, intent inference, and customized assistance. The paper highlights critical clinical considerations often overlooked by the autonomy community and proposes integrating rehabilitation with functional assistance as a future goal.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 4,
+        "recency": 3,
+        "citation_impact": 4,
+        "evidence_quality": 3
+      },
+      "total_score": 19,
+      "seminal": true,
+      "evaluator_note": "Authoritative survey in the Annual Review of Control, Robotics, and Autonomous Systems by the leading researcher in the field. Frames shared control, intent inference, and variable autonomy as the core challenge triad for wheelchair robotics. Bridges clinical and algorithmic communities; essential framing paper for any literature review in this area."
+    },
+    {
+      "id": "boucher_2013_smartwheeler_clinical",
+      "title": "Design and validation of an intelligent wheelchair towards a clinically-functional outcome",
+      "authors": ["Boucher, Patrice", "Atrash, Amin", "Kelouwani, Sousso", "Honore, Wormser", "Nguyen, Hai", "Villemure, Julien", "Routhier, Francois", "Cohen, Paul", "Demers, Louise", "Forget, Robert", "Pineau, Joelle"],
+      "year": 2013,
+      "venue": "Journal of NeuroEngineering and Rehabilitation",
+      "doi": "10.1186/1743-0003-10-58",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3691756/",
+      "abstract": "The research addresses mobility challenges for wheelchair users by developing an intelligent powered wheelchair platform. The team created three major contributions: software architecture for navigation in confined spaces, a decision-theoretic speech-control system, and the Robotic Wheelchair Skills Test evaluation protocol. Testing involved 17 subjects across 32 sessions totaling 25 hours and 9 kilometers of operation. Results demonstrated the navigation system reduced collisions by more than 60% compared to other recent intelligent wheelchair platforms. Performance with autonomous mode showed minimal decline—4% decrease in performance and 3% in safety metrics—when compared to conventional joystick control, despite minimal training with the intelligent system compared to years of joystick experience.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 5,
+        "recency": 2,
+        "citation_impact": 3,
+        "evidence_quality": 4
+      },
+      "total_score": 19,
+      "seminal": false,
+      "evaluator_note": "Gold-standard clinical validation study for the SmartWheeler platform with exceptional ecological validity (17 subjects, 32 sessions, 9 km). Introduces the Robotic Wheelchair Skills Test as an evaluation standard. 60% collision reduction versus prior platforms is a strong quantitative benchmark. Published in Journal of NeuroEngineering and Rehabilitation (open access)."
+    },
+    {
+      "id": "demeester_2008_bayesian_shared_control",
+      "title": "User-adapted plan recognition and user-adapted shared control: A Bayesian approach to semi-autonomous wheelchair driving",
+      "authors": ["Demeester, Eric", "Huntemann, Alexander", "Vanhooydonck, Dirk", "Vanacker, Gerolf", "Van Brussel, Hendrik", "Nuttin, Marnix"],
+      "year": 2008,
+      "venue": "Autonomous Robots",
+      "doi": "10.1007/s10514-007-9064-5",
+      "url": "https://link.springer.com/article/10.1007/s10514-007-9064-5",
+      "abstract": "Many elderly and physically impaired people experience difficulties when maneuvering a powered wheelchair. To ease maneuvering, powered wheelchairs have been equipped with sensors, additional computing power and intelligence by various research groups. This paper presents a Bayesian approach to maneuvering assistance for wheelchair driving that can be adapted to a specific user. More specifically, the proposed framework is able to model and estimate even complex user intents (wheelchair maneuvers that the driver has in mind), explicitly takes uncertainty on the user's intent into account, and incorporates user-specific properties and uncertainty on the user's intent when taking assistive actions, such that assistance is tailored to the user's driving skills. Additionally, this decision making is modeled as a greedy Partially Observable Markov Decision Process (POMDP). Experimental results with healthy subjects and Cerebral Palsy subjects show that the system can improve navigation outcome for people with disability and leads to around 10% faster completion of tasks compared to local obstacle avoidance systems.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 5,
+        "recency": 1,
+        "citation_impact": 4,
+        "evidence_quality": 4
+      },
+      "total_score": 19,
+      "seminal": true,
+      "evaluator_note": "Seminal wheelchair-specific Bayesian/POMDP shared control paper with ~82 confirmed citations. Includes experiments with Cerebral Palsy subjects, user-adapted intent recognition, and greedy POMDP action selection. Sets the template for all subsequent intent-inference shared-control wheelchair research. Foundational despite age."
+    },
+    {
+      "id": "reddy_2018_shared_autonomy_drl",
+      "title": "Shared Autonomy via Deep Reinforcement Learning",
+      "authors": ["Reddy, Siddharth", "Dragan, Anca D.", "Levine, Sergey"],
+      "year": 2018,
+      "venue": "Robotics: Science and Systems (RSS 2018)",
+      "doi": "10.15607/RSS.2018.XIV.005",
+      "url": "https://arxiv.org/abs/1802.01744",
+      "abstract": "In shared autonomy, user input is combined with semi-autonomous control to achieve a common goal. The goal is often unknown ex-ante, so prior work enables agents to infer the goal from user input and assist with the task. Such methods tend to assume some combination of knowledge of the dynamics of the environment, the user's policy given their goal, and the set of possible goals the user might target, which limits their application to real-world scenarios. We propose a deep reinforcement learning framework for model-free shared autonomy that lifts these assumptions. We use human-in-the-loop reinforcement learning with neural network function approximation to learn an end-to-end mapping from environmental observation and user input to agent action values, with task reward as the only form of supervision. Controlled studies with 12 users playing a video game and a pilot study with 4 users flying a real quadrotor demonstrate the ability of the algorithm to assist users with real-time control tasks in which the agent implicitly infers user intent from input. The assisted user completes the task more effectively than the user or an autonomous agent could on their own.",
+      "scores": {
+        "relevance": 4,
+        "rigor": 4,
+        "recency": 3,
+        "citation_impact": 5,
+        "evidence_quality": 3
+      },
+      "total_score": 19,
+      "seminal": true,
+      "evaluator_note": "~161 confirmed citations from RSS, a top robotics venue. Model-free deep RL shared autonomy removes prior-knowledge assumptions (goals, dynamics, user policy) limiting real-world applicability. Directly applicable to wheelchair settings without pre-defined intent models. Seminal for the DRL-based shared autonomy subfield; widely cited as the enabling framework."
+    },
+    {
+      "id": "carlson_2012_collaborative_control",
+      "title": "Collaborative control for a robotic wheelchair: evaluation of performance, attention, and workload",
+      "authors": ["Carlson, Tom", "Demiris, Yiannis"],
+      "year": 2012,
+      "venue": "IEEE Transactions on Systems, Man, and Cybernetics, Part B (Cybernetics)",
+      "doi": "10.1109/TSMCB.2011.2181833",
+      "url": "https://ieeexplore.ieee.org/document/6135817/",
+      "abstract": "The research addresses wheelchair users struggling with safe operation by proposing a collaborative control system. This mechanism uses prediction algorithms to identify driver intentions and adjusts control inputs when necessary. The evaluation combined performance metrics with eye-tracking and secondary task analysis. Results demonstrated that users without assistance experienced collisions, whereas those with the collaborative controller achieved safer driving while maintaining reduced cognitive workload. The authors emphasize potential applications in shared control systems, particularly for brain-machine interfaces where low-frequency user input is involved.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 5,
+        "recency": 1,
+        "citation_impact": 4,
+        "evidence_quality": 4
+      },
+      "total_score": 19,
+      "seminal": true,
+      "evaluator_note": "Seminal empirical paper from a top IEEE transactions journal combining eye-tracking and secondary task paradigms to measure cognitive load reduction in collaborative wheelchair control. Establishes the methodological template for evaluating shared autonomy benefits. Highly cited (~100+ citations). Seminal status justified by measurement innovation and venue prestige."
+    },
+    {
+      "id": "ghorbel_2017_decision_theoretic",
+      "title": "A decision-theoretic approach for the collaborative control of a smart wheelchair",
+      "authors": ["Ghorbel, Mahmoud", "Pineau, Joelle", "Gourdeau, Richard", "Javdani, Shervin", "Srinivasa, Siddhartha"],
+      "year": 2017,
+      "venue": "International Journal of Social Robotics",
+      "doi": "10.1007/s12369-017-0434-7",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7449130/",
+      "abstract": "The research presents a framework enabling shared control between human operators and robotic systems in wheelchair navigation. Using a Partially Observable Markov Decision Process (POMDP), the system combines user inputs with autonomous intelligence to optimize collaborative actions while accounting for uncertainty in user intent, commands, and environmental conditions. Key findings from testing on the SmartWheeler platform with eight participants demonstrate that this approach improves navigation efficiency and usability compared to manual control alone. Participants experienced significantly less cognitive workload using collaborative control, allowing them to focus on secondary tasks while maintaining safe navigation. The system operates through two main components: a prediction module estimating user goals from sensor and input data, and an assistance module selecting actions that minimize expected user costs while respecting their intent.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 4,
+        "recency": 2,
+        "citation_impact": 2,
+        "evidence_quality": 4
+      },
+      "total_score": 17,
+      "seminal": false,
+      "evaluator_note": "Bridges the Javdani hindsight-optimization POMDP framework and the SmartWheeler clinical platform. User study with 8 participants demonstrates reduced cognitive workload. Co-authored by Javdani and Srinivasa, directly connecting theoretical shared autonomy and applied wheelchair communities. Moderate citation impact but strong relevance and evidence."
+    },
+    {
+      "id": "urdiales_2011_collaborative_control_disabled",
+      "title": "Wheelchair collaborative control for disabled users navigating indoors",
+      "authors": ["Urdiales, Cristina", "Fernandez-Carmona, Manuel", "Peula, Jose M.", "Cortes, Ulises", "Annichiaricco, Roberta", "Caltagirone, Carlo", "Sandoval, Francisco"],
+      "year": 2011,
+      "venue": "Artificial Intelligence in Medicine",
+      "doi": "10.1016/j.artmed.2011.05.002",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21723104/",
+      "abstract": "This research proposes a shared control method for robotic wheelchairs enabling simultaneous contributions from both users and assistive systems. Rather than switching control between person and robot, the approach weights their commands according to their respective local efficiencies and merges them through reactive navigation. Testing involved 18 volunteers with varying physical and cognitive disabilities in a home setting. Results indicated successful task completion and positive user/caregiver feedback, with statistical analysis (p=0.016) demonstrating meaningful performance improvements using this collaborative methodology.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 4,
+        "recency": 1,
+        "citation_impact": 3,
+        "evidence_quality": 4
+      },
+      "total_score": 17,
+      "seminal": false,
+      "evaluator_note": "Continuous efficiency-weighting blending approach (not switching) with 18 disabled participants in a home setting. Statistically significant results (p=0.016). Important for demonstrating the efficiency-blending method to shared authority, and one of few studies with actual disabled users in an ecological home environment."
+    },
+    {
+      "id": "viswanathan_2017_older_adults_preferences",
+      "title": "Intelligent wheelchair control strategies for older adults with cognitive impairment: user attitudes, needs, and preferences",
+      "authors": ["Viswanathan, Pooja", "Zambalde, Emerson P.", "Foley, Glen", "Graham, Jillian L.", "Wang, Rosalie H.", "Adhikari, Bikram", "Mitchell, Ian M."],
+      "year": 2017,
+      "venue": "Autonomous Robots",
+      "doi": "10.1007/s10514-016-9568-y",
+      "url": "https://link.springer.com/article/10.1007/s10514-016-9568-y",
+      "abstract": "Intelligent powered wheelchairs can increase mobility and independence for older adults with cognitive impairment by providing collision avoidance and navigation support. The level and type of control desired by this target population during intelligent wheelchair use had not been previously explored. A study was conducted with a mock intelligent wheelchair offering three different modes of user control. Users wanted to be in the loop during wheelchair operation and/or high-level decision making, and also provided specific contexts where an autonomous wheelchair would be helpful. Participants identified benefits of and concerns with intelligent wheelchairs, along with desired features and functionality.",
+      "scores": {
+        "relevance": 4,
+        "rigor": 4,
+        "recency": 2,
+        "citation_impact": 3,
+        "evidence_quality": 4
+      },
+      "total_score": 17,
+      "seminal": false,
+      "evaluator_note": "Fills a critical user-centered gap: empirically reveals that cognitively impaired older adults want to remain in the control loop, directly challenging fully autonomous approaches. Published in Autonomous Robots (top venue). Informs autonomy level design and user agency frameworks for this underserved population."
+    },
+    {
+      "id": "how_2013_intelligent_wheelchair_cognitive",
+      "title": "Evaluation of an intelligent wheelchair system for older adults with cognitive impairments",
+      "authors": ["How, Tuck-Voon", "Wang, Rosalie H.", "Mihailidis, Alex"],
+      "year": 2013,
+      "venue": "Journal of NeuroEngineering and Rehabilitation",
+      "doi": "10.1186/1743-0003-10-90",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3750699/",
+      "abstract": "The research describes development and testing of an add-on intelligent system designed to enhance powered wheelchair safety for cognitively impaired seniors. The system incorporates two primary features: vision-based collision prevention and audio-guided navigation assistance. A two-phase evaluation included environmental performance testing against typical long-term care facility obstacles, followed by user trials with older adults experiencing cognitive decline. Results demonstrated the system successfully detected obstacles in controlled settings and reduced collision frequency during user testing, while also lowering perceived workload. However, task completion time showed minimal improvement, and audio prompt adherence remained suboptimal in some participants, indicating opportunities for continued refinement in usability aspects of the technology.",
+      "scores": {
+        "relevance": 4,
+        "rigor": 4,
+        "recency": 2,
+        "citation_impact": 3,
+        "evidence_quality": 4
+      },
+      "total_score": 17,
+      "seminal": false,
+      "evaluator_note": "One of few studies testing intelligent wheelchair assistance with actual cognitively impaired older adults in realistic long-term care settings. Two-phase evaluation (lab performance + user trials) is methodologically sound. Published in Journal of NeuroEngineering and Rehabilitation. Candidly reported limitations (audio adherence, task time) increase credibility."
+    },
+    {
+      "id": "xu_2025_conav_chair_evaluation",
+      "title": "CoNav Chair: Development and Evaluation of a Shared Control based Wheelchair for the Built Environment",
+      "authors": ["Xu, Yifan", "Wang, Qianwei", "Lillie, Jordan", "Kamat, Vineet", "Menassa, Carol", "D'Souza, Clive"],
+      "year": 2025,
+      "venue": "arXiv preprint",
+      "doi": null,
+      "url": "https://arxiv.org/abs/2507.11716",
+      "abstract": "The paper presents a robotic wheelchair system addressing mobility needs for people with disabilities. The CoNav Chair implements a shared control navigation and obstacle avoidance framework built on the Robot Operating System (ROS). Rather than choosing between purely manual or fully autonomous operation, the system offers a hybrid approach. A usability study with 21 unimpaired participants tested three navigation modes in an indoor building environment. The shared control mode demonstrated superior performance, achieving significantly fewer collisions while matching autonomous and manual modes on completion time, trajectory efficiency, and smoothness. Users rated the shared control approach as safer and more efficient based on subjective assessments.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 3,
+        "recency": 5,
+        "citation_impact": 1,
+        "evidence_quality": 4
+      },
+      "total_score": 18,
+      "seminal": false,
+      "evaluator_note": "Most recent empirical wheelchair shared-control evaluation (2025, arXiv). Three-mode comparison (manual/shared/autonomous) with 21 participants in an indoor building environment; shared control yields fewest collisions. Rigor is moderate (preprint, unimpaired participants only) but recency and direct relevance are exceptional. Provides a current state-of-the-art baseline."
+    },
+    {
+      "id": "guo_2025_shared_autonomy_cognitive_load",
+      "title": "Shared autonomy for cognitive load regulation in autonomous wheelchairs",
+      "authors": ["Guo, J.", "Hu, Y.", "Huang, Q."],
+      "year": 2025,
+      "venue": "Cognition, Technology & Work",
+      "doi": "10.1007/s10111-025-00825-6",
+      "url": "https://link.springer.com/article/10.1007/s10111-025-00825-6",
+      "abstract": "This study advances human-machine partnership design in assistive mobility by introducing a cognitive digital twin framework for autonomous wheelchair systems that investigates dynamic collaboration mechanisms between users with motor impairments and autonomous driving systems, focusing on situational awareness regulation and adaptive autonomy allocation. Through Unity-based digital-twin simulation experiments with 52 participants, the research evaluated multi-level human-machine interface designs, finding that progressive information presentation significantly reduced reaction times by 23.5% and improved task accuracy for up to 98.1%. Shared and supervisory control strategies with higher automation levels markedly enhanced user experience and operational efficiency while lowering cognitive load.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 4,
+        "recency": 5,
+        "citation_impact": 1,
+        "evidence_quality": 3
+      },
+      "total_score": 18,
+      "seminal": false,
+      "evaluator_note": "Recent 2025 peer-reviewed Springer journal paper with the largest participant sample in this set (n=52). Quantifies cognitive load impacts of shared vs. supervisory autonomy levels with specific metrics (23.5% reaction time reduction, 98.1% task accuracy). Simulation-based evidence is a limitation, but HMI design findings are directly applicable to wheelchair interface design."
+    },
+    {
+      "id": "chatzidimitriadis_2023_rl_shared_autonomy",
+      "title": "Reinforcement Learning for Shared Autonomy in Powered Wheelchair Navigation",
+      "authors": ["Chatzidimitriadis, Sotirios"],
+      "year": 2023,
+      "venue": "University of Kent (PhD thesis)",
+      "doi": "10.22024/UniKent/01.02.102477",
+      "url": "https://kar.kent.ac.uk/102477/",
+      "abstract": "This work addresses assistive robotics for powered wheelchairs using deep reinforcement learning. The researcher developed three key contributions: (1) a mapless autonomous navigation system trained in virtual environments and validated against established path planning methods, (2) a novel shared control framework using reinforcement learning that accepts noisy user input while maintaining safety—reducing collisions significantly in trials, and (3) a vision-based head-control interface using face detection as an alternative to joystick control. The research demonstrates that when the shared control system combines with the head-control interface, results show a remarkable 92% reduction in collisions while improving user autonomy and safety outcomes in real-world testing scenarios.",
+      "scores": {
+        "relevance": 5,
+        "rigor": 3,
+        "recency": 4,
+        "citation_impact": 1,
+        "evidence_quality": 3
+      },
+      "total_score": 16,
+      "seminal": false,
+      "evaluator_note": "Recent PhD thesis (2023) directly combining RL-based shared autonomy with powered wheelchair navigation, including a novel head-control interface. 92% collision reduction result is noteworthy. Rigor is lower than peer-reviewed journal articles (thesis format) and citation impact is negligible. Qualifies at threshold (16) due to high relevance and recency; provides a current implementation perspective and alternative interface design."
+    }
+  ],
+  "excluded": [
+    {
+      "id": "argall_2015_assistive_machines_robots",
+      "reason": "Position/conference paper (SPIE) presenting a research agenda rather than empirical results. Core content subsumed by the more comprehensive 2018 Annual Review survey by the same author. Estimated score ~13 (relevance=5, rigor=2, recency=1, citation_impact=2, evidence_quality=1)."
+    },
+    {
+      "id": "taha_2008_pomdp_intent",
+      "reason": "Short ICRA conference paper on POMDP intent prediction at building scale. Historically interesting but limited scope and methodology; subsumed by demeester_2008 which covers similar POMDP intent-inference ground more thoroughly with user studies. Estimated score ~14 (relevance=4, rigor=3, recency=1, citation_impact=2, evidence_quality=2)."
+    },
+    {
+      "id": "carlson_2008_human_wheelchair_collaboration",
+      "reason": "Early ICRA conference paper outlining intent-prediction adaptive assistance concept. Superseded methodologically and empirically by the same authors' 2012 IEEE Transactions paper (carlson_2012_collaborative_control) which is retained. Estimated score ~13 (relevance=4, rigor=3, recency=1, citation_impact=3, evidence_quality=2)."
+    },
+    {
+      "id": "ashley_2017_semi_autonomous_crowded",
+      "reason": "ICORR conference paper on simple ultrasonic-sensor collision avoidance in crowded environments. Limited to reactive obstacle avoidance without intent inference or adjustable autonomy frameworks. No user study with disabled participants. Estimated score ~12 (relevance=3, rigor=3, recency=2, citation_impact=1, evidence_quality=2)."
+    },
+    {
+      "id": "lopes_2013_brain_actuated_wheelchair",
+      "reason": "BCI-specific shared control for wheelchair navigation (P300 + two-layer control). BCI-specific scope limits generalizability; broader BCI representation is provided by tang_2018 which also adds autonomous object recognition and expert-system planning. Estimated score ~15 (relevance=4, rigor=4, recency=2, citation_impact=2, evidence_quality=3)."
+    },
+    {
+      "id": "lopes_2011_p300_bci_shared_control",
+      "reason": "Short IROS conference paper (precursor to lopes_2013 by the same group). Superseded by the 2013 journal version. Estimated score ~12 (relevance=4, rigor=3, recency=1, citation_impact=2, evidence_quality=2)."
+    },
+    {
+      "id": "tang_2018_bci_smart_wheelchair",
+      "reason": "BCI + object recognition integration for daily living tasks. Only 3 patients + 4 healthy participants with no rigorous comparative baseline. BCI-specific scope and small sample limit generalizability to shared autonomy research broadly. Estimated score ~14 (relevance=3, rigor=3, recency=3, citation_impact=2, evidence_quality=3)."
+    },
+    {
+      "id": "soh_2015_learning_assistance_demonstration",
+      "reason": "Learning Assistance by Demonstration via sparse Gaussian processes and haptic controllers. JHRI venue has moderate impact and the approach is more directly covered by sentouh_2018 (one-shot GP learning) which is more recent. Estimated score ~14 (relevance=4, rigor=3, recency=2, citation_impact=2, evidence_quality=3)."
+    },
+    {
+      "id": "sentouh_2018_learning_shared_control_demo",
+      "reason": "One-shot Gaussian process learning from haptic demonstration in IEEE Transactions on Haptics. Strong methodology but haptic-specific focus is narrower than the general shared autonomy frameworks retained; relevance to power wheelchair shared autonomy broadly is secondary to the interface-learning contribution. Estimated score ~15 (relevance=3, rigor=4, recency=3, citation_impact=2, evidence_quality=3)."
+    },
+    {
+      "id": "nguyen_2023_force_feedback_joystick",
+      "reason": "Frontiers in Control Engineering paper on haptic force-feedback joystick shared control. Frontiers venue has lower prestige; validation is via hardware-in-the-loop simulation only with no user study involving disabled participants. Estimated score ~14 (relevance=4, rigor=3, recency=4, citation_impact=1, evidence_quality=2)."
+    },
+    {
+      "id": "xi_2020_shared_control_physical_motivation",
+      "reason": "Addresses preserving residual capabilities via RL-based control weighting. Open-access IJERPH venue has lower robotics prestige and experimental detail is limited. Estimated score ~13 (relevance=4, rigor=3, recency=3, citation_impact=1, evidence_quality=2)."
+    },
+    {
+      "id": "leaman_2017_comprehensive_review",
+      "reason": "Broad smart wheelchair review not focused specifically on shared autonomy. Context role is better served by argall_2018 which is more focused, higher impact, and explicitly addresses shared control. Estimated score ~13 (relevance=3, rigor=3, recency=2, citation_impact=3, evidence_quality=1)."
+    },
+    {
+      "id": "sivakanthan_2022_taxonomy_readiness",
+      "reason": "Neuroscience Letters mini-review on robotic wheelchair taxonomy and translational readiness. Valuable for framing the prototype-to-market gap but not primary research on shared autonomy algorithms or evaluation. Estimated score ~12 (relevance=3, rigor=3, recency=4, citation_impact=1, evidence_quality=1)."
+    },
+    {
+      "id": "vanhooydonck_2010_adaptable_navigational_assistance",
+      "reason": "Neural-network personalized user model for adaptive shared control assistance. Robotics and Autonomous Systems 2010 publication has accumulated limited citations; neural-network personalization approach was not widely adopted in subsequent wheelchair work. Estimated score ~13 (relevance=4, rigor=3, recency=1, citation_impact=2, evidence_quality=2)."
+    },
+    {
+      "id": "casado_2022_federated_learning",
+      "reason": "Federated Learning from Demonstration at IROS 2022. Novel federated approach but no user study with wheelchair users; experimental evaluation limited to domain-transfer accuracy metrics. Estimated score ~14 (relevance=4, rigor=3, recency=4, citation_impact=1, evidence_quality=2)."
+    },
+    {
+      "id": "erdogan_2017_user_preference_paradigms",
+      "reason": "ICORR conference companion paper to erdogan_2017_robotic_wheelchair_control predicting user preference via ML. Core experimental content captured in the retained journal paper from the same group. Estimated score ~14 (relevance=4, rigor=3, recency=2, citation_impact=2, evidence_quality=3)."
+    },
+    {
+      "id": "xu_2025_conav_chair_design",
+      "reason": "ISARC 2025 conference design paper for the CoNav Chair. System design content fully superseded by the companion evaluation paper (xu_2025_conav_chair_evaluation) which is retained and includes both design and empirical results. Estimated score ~13 (relevance=4, rigor=2, recency=5, citation_impact=1, evidence_quality=2)."
+    }
+  ]
+}
