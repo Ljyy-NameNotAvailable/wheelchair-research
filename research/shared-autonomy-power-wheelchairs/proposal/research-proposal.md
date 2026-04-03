@@ -41,8 +41,8 @@ Shared autonomy control loops require sensor-to-decision latencies on the order 
 
 #### Hardware Platforms
 
-- **NVIDIA Jetson Orin Nano** — representative high-end wheelchair edge platform
-- **Raspberry Pi 5** — representative low-cost edge platform
+- **NVIDIA Jetson Orin Nano** (on-wheelchair edge device) — 10 TOPS, tight inference budget
+- **Cloud server (TBD)** — offload target for heavy inference
 
 ---
 
@@ -81,9 +81,9 @@ To characterize the accuracy-latency frontier for on-device inference:
 
 ### Hypotheses
 
-- **H1:** On-device inference on Jetson Orin Nano with INT8 quantization meets the 100ms latency threshold; Raspberry Pi 5 does not.
+- **H1:** On-device inference on the Jetson Orin Nano exceeds the 100ms latency budget for all but the most aggressively quantized models, due to the platform's 10 TOPS constraint.
 - **H2:** Cloud offloading meets the latency threshold only under low-RTT conditions (≤50ms); it degrades under realistic mobile network variability.
-- **H3:** Adaptive partitioning achieves lower 95th-percentile latency than either fixed strategy across varied network conditions.
+- **H3:** Adaptive partitioning achieves lower 95th-percentile latency than either fixed strategy across varied network conditions — making it the only viable approach for consistent real-time performance on Nano-class hardware.
 
 ---
 
