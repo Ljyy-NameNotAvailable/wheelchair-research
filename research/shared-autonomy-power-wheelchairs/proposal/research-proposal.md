@@ -1,7 +1,7 @@
 # Research Proposal
 ## User Adaptation to Shared Control Assistance in Powered Wheelchairs
 
-**Submitted to:** [Professor Name]
+**Submitted to:** Professor Marco Brocanelli
 **Date:** April 3, 2026
 
 ---
