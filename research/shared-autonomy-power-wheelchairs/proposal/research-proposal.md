@@ -1,7 +1,6 @@
 # Research Proposal
 ## Edge Deployment of LLM-Based Semantic Intent Inference for Shared-Control Wheelchairs
 
-**Submitted to:** Professor Marco Brocanelli
 **Course:** Edge Computing
 **Date:** April 3, 2026
 
