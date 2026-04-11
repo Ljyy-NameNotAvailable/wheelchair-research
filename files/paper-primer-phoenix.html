@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Before You Read PHOENIX — A Beginner's Booklet</title>
+  <style>
+    /* ── Global ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Georgia", serif;
+      font-size: 17px;
+      line-height: 1.85;
+      background: #faf8f4;
+      color: #222;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 28px 80px;
+    }
+    /* ── Typography ── */
+    h1 { font-size: 2em; margin-bottom: .3em; color: #1a1a2e; }
+    h2 { font-size: 1.45em; margin: 2.4em 0 .5em; color: #16213e;
+         border-bottom: 2px solid #e0d9cc; padding-bottom: .25em; }
+    h3 { font-size: 1.15em; margin: 1.8em 0 .4em; color: #0f3460; }
+    p  { margin-bottom: 1em; }
+    ul, ol { margin: .6em 0 1em 1.6em; }
+    li { margin-bottom: .4em; }
+    a  { color: #0f3460; }
+
+    /* ── Cover ── */
+    .cover {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 48px 40px;
+      margin-bottom: 48px;
+      text-align: center;
+    }
+    .cover h1 { color: #fff; font-size: 2.2em; margin-bottom: .5em; }
+    .cover .subtitle { font-size: 1.05em; color: #c9d6e3; margin-bottom: 1.2em; }
+    .cover .tagline  { font-size: .95em; color: #8ab4c9; font-style: italic; }
+
+    /* ── Chapter badge ── */
+    .chapter-badge {
+      display: inline-block;
+      background: #0f3460;
+      color: #fff;
+      font-size: .75em;
+      font-family: monospace;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: .5em;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    /* ── Callout boxes ── */
+    .box {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 1.4em 0;
+    }
+    .box-analogy   { background: #eef7ee; border-left: 4px solid #4caf50; }
+    .box-key       { background: #e8f4fd; border-left: 4px solid #2196f3; }
+    .box-warning   { background: #fff8e1; border-left: 4px solid #ffc107; }
+    .box-chinese   { background: #fdeef0; border-left: 4px solid #e53935;
+                     font-size: .97em; }
+    .box-critique  { background: #f3e5f5; border-left: 4px solid #9c27b0; }
+    .box-title {
+      font-weight: bold;
+      font-size: .88em;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: .4em;
+    }
+    .box-analogy .box-title   { color: #2e7d32; }
+    .box-key .box-title       { color: #1565c0; }
+    .box-warning .box-title   { color: #e65100; }
+    .box-chinese .box-title   { color: #b71c1c; }
+    .box-critique .box-title  { color: #6a1b9a; }
+
+    /* ── Math-style display ── */
+    .formula {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px 18px;
+      font-family: "Courier New", monospace;
+      font-size: .95em;
+      margin: 1em 0;
+      overflow-x: auto;
+    }
+
+    /* ── Glossary table ── */
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: .95em; }
+    th { background: #16213e; color: #fff; padding: 9px 12px; text-align: left; }
+    td { padding: 8px 12px; border-bottom: 1px solid #e0d9cc; }
+    tr:nth-child(even) td { background: #f5f2ec; }
+
+    /* ── Navigation TOC ── */
+    .toc {
+      background: #f0ece4;
+      border-radius: 8px;
+      padding: 20px 28px;
+      margin-bottom: 40px;
+    }
+    .toc h2 { border: none; margin-top: 0; font-size: 1.15em; }
+    .toc ol { margin-left: 1.2em; }
+    .toc li { margin-bottom: .3em; font-size: .97em; }
+    .toc a  { text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Section divider ── */
+    hr.section { border: none; border-top: 1px dashed #ccc; margin: 3em 0; }
+
+    /* ── Footer ── */
+    footer { margin-top: 60px; font-size: .85em; color: #888; text-align: center; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ COVER -->
+<div class="cover">
+  <h1>Before You Read PHOENIX</h1>
+  <p class="subtitle">A Beginner's Booklet for Understanding<br>
+  <em>"In-Orbit Processing or Not? Sunlight-Aware Task Scheduling<br>
+  for Energy-Efficient Space Edge Computing Networks"</em></p>
+  <p class="tagline">Written for someone with no engineering background &mdash; step by step, concept by concept.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ TOC -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#ch1">What Is a Satellite?</a></li>
+    <li><a href="#ch2">How Do Satellites Get Power?</a></li>
+    <li><a href="#ch3">What Is Computing? Cloud vs. Edge</a></li>
+    <li><a href="#ch4">Space Edge Computing (SEC)</a></li>
+    <li><a href="#ch5">Task Offloading — The Core Idea</a></li>
+    <li><a href="#ch6">Battery Health: Depth of Discharge</a></li>
+    <li><a href="#ch7">Task Scheduling — Who Does What, When?</a></li>
+    <li><a href="#ch8">Networks Between Satellites and the Ground</a></li>
+    <li><a href="#ch9">Why Is This Problem Hard? NP-Hardness</a></li>
+    <li><a href="#ch10">Heuristic Algorithms — Good Enough, Fast Enough</a></li>
+    <li><a href="#ch11">Putting It All Together: The PHOENIX System</a></li>
+    <li><a href="#ch12">How to Read and Critique This Paper</a></li>
+    <li><a href="#ch13">Quick Glossary</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ CH 1 -->
+<section id="ch1">
+  <span class="chapter-badge">Chapter 1</span>
+  <h2>What Is a Satellite?</h2>
+
+  <p>A <strong>satellite</strong> is an object that travels around ("orbits") another, larger object in space. The Moon is a natural satellite of the Earth. But in this paper, "satellite" always means a <strong>human-made machine</strong> launched into space to do useful work — like sending phone signals, taking photos of Earth, or, as this paper studies, doing computer calculations in space.</p>
+
+  <div class="box box-analogy">
+    <div class="box-title">Analogy — Think of it like a flying robot</div>
+    Imagine you send a robot to fly around the Earth in a circle, very high up. The robot carries cameras, computers, and radios. It keeps circling — never stopping — while doing its job. That is basically what a satellite does.
+  </div>
+
+  <h3>What is an orbit?</h3>
+  <p>An <strong>orbit</strong> (轨道) is the curved path a satellite follows around the Earth. Gravity pulls the satellite toward Earth, but the satellite is also moving sideways so fast that it keeps "missing" the Earth — and that balance creates the circular path.</p>
+
+  <p>There are different heights of orbit. This paper focuses on <strong>Low Earth Orbit (LEO)</strong>, which is roughly 500–2,000 km above the ground. LEO satellites are much closer to us than GPS satellites. Because they are close, signals travel faster, but each satellite can only see a small part of Earth at any moment.</p>
+
+  <h3>What is a satellite constellation?</h3>
+  <p>A single satellite can only be above your head for a few minutes at a time. To provide continuous coverage, companies like SpaceX (Starlink), Amazon (Kuiper), and OneWeb launch <strong>hundreds or thousands</strong> of satellites. This large group working together is called a <strong>constellation</strong> (星座/星群). The paper studies constellations like Starlink and Iridium NEXT.</p>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>卫星 (satellite)</strong>：绕地球飞行的人造机器，执行通信、拍照、计算等任务。<br>
+    <strong>轨道 (orbit)</strong>：卫星绕地球飞行的路径。<br>
+    <strong>低地球轨道 LEO (Low Earth Orbit)</strong>：距地面约500–2000千米的轨道，比GPS卫星低得多，信号延迟小。<br>
+    <strong>星座 (constellation)</strong>：大量卫星组成的网络，协同工作提供连续覆盖。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 2 -->
+<section id="ch2">
+  <span class="chapter-badge">Chapter 2</span>
+  <h2>How Do Satellites Get Power?</h2>
+
+  <p>This chapter is crucial because <strong>the entire PHOENIX paper is about saving power</strong>. If you understand how satellites get and use energy, everything else in the paper will make sense.</p>
+
+  <h3>Solar panels and batteries</h3>
+  <p>Satellites have two energy sources:</p>
+  <ol>
+    <li><strong>Solar panels</strong> — flat panels covered in solar cells that convert sunlight into electricity. When the satellite is in sunlight, the panels generate plenty of electricity.</li>
+    <li><strong>Rechargeable batteries</strong> — when the satellite flies into Earth's shadow (called an <strong>eclipse</strong>), there is no sunlight, so the solar panels stop working. The satellite must run on stored battery power.</li>
+  </ol>
+
+  <div class="box box-analogy">
+    <div class="box-title">Analogy — Like your phone on a camping trip</div>
+    Imagine you are camping with no electricity. During the day, you charge your phone using a small solar charger. At night, you use the battery. If you watch too many videos at night, the battery drains faster and may die before morning. The satellite faces exactly the same problem — but in space.
+  </div>
+
+  <h3>Sunlight phase vs. eclipse phase</h3>
+  <p>As a LEO satellite circles the Earth roughly every 90 minutes, it alternates between two phases:</p>
+  <ul>
+    <li><strong>Sunlight phase (日照期)</strong>: Solar panels generate electricity. The satellite can even store some extra in the battery.</li>
+    <li><strong>Eclipse phase (地影期/食相)</strong>: The satellite is in Earth's shadow. No solar power. It must use the battery.</li>
+  </ul>
+
+  <p>A typical LEO satellite spends about 60–70% of its time in sunlight and 30–40% in eclipse. However — and this is a key observation of the paper — <strong>some orbital planes are tilted so that satellites on those orbits are always in sunlight, with almost no eclipse at all</strong>. These are the "sunlight-sufficient" or "sunlit" edges that PHOENIX exploits.</p>
+
+  <div class="box box-key">
+    <div class="box-title">Key Insight of the Paper</div>
+    Not all satellites run out of battery equally. Some satellites in certain orbital planes are in sunlight <em>almost 100% of the time</em>. If you send computation tasks to those satellites, they can do the work without draining anyone's battery. PHOENIX is built on this observation.
+  </div>
+
+  <h3>Why does battery usage matter so much?</h3>
+  <p>Every time a battery is charged and then discharged, it wears out a little. The more deeply you drain it each time (called the <strong>Depth of Discharge</strong>), the faster it wears out. A satellite battery that is drained deeply every cycle might last only 2–3 years. A battery drained gently might last 6–7 years. Since you cannot send a repair crew to space, battery life directly equals satellite life. This is why the paper focuses so heavily on reducing battery energy consumption.</p>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>太阳能板 (solar panels)</strong>：将太阳光转化为电能的装置，日照时供电。<br>
+    <strong>蓄电池 (battery)</strong>：储存多余电能，在卫星进入地球阴影时使用。<br>
+    <strong>地影期 (eclipse)</strong>：卫星飞入地球阴影，太阳能板无法发电的时段。<br>
+    <strong>放电深度 DoD (Depth of Discharge)</strong>：每次使用电池时消耗的电量占总容量的百分比。放得越深，电池寿命越短。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 3 -->
+<section id="ch3">
+  <span class="chapter-badge">Chapter 3</span>
+  <h2>What Is Computing? Cloud vs. Edge</h2>
+
+  <p>The paper is fundamentally about <em>where</em> to run computer programs. To understand that, you need to understand the three main options: <strong>local computing</strong>, <strong>cloud computing</strong>, and <strong>edge computing</strong>.</p>
+
+  <h3>Local computing (本地计算)</h3>
+  <p>This means the device itself does all the work. Your phone processes a photo using its own chip. A satellite processes its own camera image using its own onboard computer. It is simple but uses the device's own power.</p>
+
+  <h3>Cloud computing (云计算)</h3>
+  <p>Instead of doing the work locally, you send the data over the internet to a powerful server in a data center (like Amazon AWS or Google Cloud), wait for it to process the data, and receive the answer back. The "cloud" server has unlimited power (it is plugged into the electricity grid). But the <strong>problem is distance</strong>: sending large amounts of data from space to the ground takes time and uses power for the radio transmission.</p>
+
+  <div class="box box-analogy">
+    <div class="box-title">Analogy — Restaurant kitchen vs. cooking at home</div>
+    <strong>Local computing</strong> = cooking at home yourself. Uses your own gas and time.<br>
+    <strong>Cloud computing</strong> = ordering delivery from a restaurant far away. The restaurant has a big kitchen (lots of power), but you have to wait for delivery, and it might be slow.<br>
+    <strong>Edge computing</strong> = using a small shared kitchen in your apartment building. Closer than the restaurant, faster, but not as powerful as the big restaurant kitchen.
+  </div>
+
+  <h3>Edge computing (边缘计算)</h3>
+  <p><strong>Edge computing</strong> means putting small computers closer to where data is created, instead of sending all data to a distant cloud. "Edge" means the <em>edge</em> of the network — close to the source of data. A smart traffic camera that analyzes footage by itself (without sending video to a server) is an example of edge computing.</p>
+
+  <p>The advantage of edge computing is <strong>speed and bandwidth savings</strong>: you don't have to transmit all the raw data over a slow or expensive connection. You process it nearby and only send the result (e.g., "there is a fire here" instead of sending the entire 4K video).</p>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>云计算 (cloud computing)</strong>：把计算任务发送到远处功能强大的服务器（数据中心）处理，再把结果返回。优点是算力强，缺点是距离远、传输慢。<br>
+    <strong>边缘计算 (edge computing)</strong>：在数据产生的地方附近就地处理，不需要把所有原始数据传回数据中心。优点是快、节省带宽。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 4 -->
+<section id="ch4">
+  <span class="chapter-badge">Chapter 4</span>
+  <h2>Space Edge Computing (SEC)</h2>
+
+  <p><strong>Space Edge Computing (SEC)</strong> is simply the idea of doing edge computing <em>on satellites</em>. Instead of sending all raw satellite data down to the ground for processing, you put a small but capable computer on the satellite and process the data right there in orbit.</p>
+
+  <h3>Why is SEC useful?</h3>
+  <p>Consider wildfire monitoring. A satellite captures thousands of high-resolution images per hour. If it had to send all of those raw images to the ground, the downlink (transmission channel from space to ground) would be completely overwhelmed. But if the satellite can run an AI model onboard that says "image 4,721 has smoke — send this one," then it only needs to send a tiny fraction of the data. This is faster, cheaper, and more useful for time-sensitive emergencies.</p>
+
+  <h3>What makes SEC different from regular edge computing?</h3>
+  <p>The key difference is <strong>power constraints</strong>. A ground-based edge computer is plugged into the power grid. A satellite gets its power from a small solar panel and a battery. Running a GPU (a powerful computing chip) on a satellite drains that battery fast. This trade-off — intelligence vs. power — is the central problem the paper addresses.</p>
+
+  <div class="box box-key">
+    <div class="box-title">The Core Tension</div>
+    More onboard computing = smarter satellite = faster results = less data to transmit<br>
+    <em>But also:</em> More onboard computing = more power used = battery drains faster = satellite dies sooner
+  </div>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>空间边缘计算 SEC (Space Edge Computing)</strong>：在卫星上直接处理数据，而不是把所有原始数据传回地面。好处是速度快、节省传输带宽；坏处是卫星本身的电量有限，计算越多耗电越多。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 5 -->
+<section id="ch5">
+  <span class="chapter-badge">Chapter 5</span>
+  <h2>Task Offloading — The Core Idea</h2>
+
+  <p><strong>Task offloading</strong> (任务卸载) means: instead of doing a computing job yourself, you send it to someone else to do it for you, and then receive the result.</p>
+
+  <p>In the context of this paper, a satellite has a computing job (e.g., analyze this satellite image). It has several choices:</p>
+
+  <ol>
+    <li><strong>Process it locally right now</strong> — do the job on its own computer, immediately. Uses the satellite's own power, which might come from the battery if it is in eclipse.</li>
+    <li><strong>Delay local processing</strong> — wait until the satellite enters sunlight, then process locally using solar power (not battery). Saves battery, but takes longer.</li>
+    <li><strong>Offload to a nearby "sunlit" satellite</strong> — send the task through inter-satellite links to another satellite that is in sunlight (and therefore has plenty of free power). That satellite does the job and sends the result back.</li>
+    <li><strong>Offload to a ground station</strong> — send the data down to Earth, let a ground computer handle it. The ground has unlimited power, but transmitting a lot of data down is slow and expensive in bandwidth.</li>
+  </ol>
+
+  <div class="box box-analogy">
+    <div class="box-title">Analogy — You have a big homework assignment</div>
+    1. <strong>Do it yourself now</strong> — uses your energy (even if you're tired).<br>
+    2. <strong>Wait until tomorrow when you're rested</strong> — saves energy but takes more time.<br>
+    3. <strong>Ask a classmate who has lots of free time</strong> — they do it, you pay them with data transmission cost.<br>
+    4. <strong>Send it to a tutoring center</strong> — they have lots of resources, but it takes time to mail it and get it back.
+  </div>
+
+  <p>PHOENIX's job is to automatically decide which of these four options is best for every task, every moment, in a network with hundreds of satellites.</p>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>任务卸载 (task offloading)</strong>：把计算任务从一个设备转移到另一个设备来完成。这里的"任务"是指对卫星拍摄的图片或数据做分析、处理等工作。<br>
+    PHOENIX的核心策略是：优先把任务交给"日照充足"的卫星（不用消耗电池），或者延迟到自己进入日照区再处理，从而减少电池的损耗。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 6 -->
+<section id="ch6">
+  <span class="chapter-badge">Chapter 6</span>
+  <h2>Battery Health: Depth of Discharge (DoD)</h2>
+
+  <p>This is one of the most important technical concepts in the paper. Let's understand it carefully.</p>
+
+  <h3>What is Depth of Discharge?</h3>
+  <p><strong>Depth of Discharge (DoD)</strong> is the percentage of a battery's capacity that has been used in one discharge cycle. If your battery is 100% full and you use it until it is at 60%, the DoD was 40%. If you drain it to 0%, the DoD was 100%.</p>
+
+  <div class="formula">
+    DoD (%) = (Energy used in one cycle) / (Maximum battery capacity) × 100%
+  </div>
+
+  <h3>Why does DoD affect battery lifetime?</h3>
+  <p>Rechargeable batteries (like lithium batteries in your phone or in satellites) wear out a little every time you charge and discharge them. The key finding from battery research is: <strong>the deeper you discharge a battery each time, the fewer total charge-discharge cycles it can handle before dying.</strong></p>
+
+  <p>For example:</p>
+  <ul>
+    <li>A battery discharged to 20% DoD every cycle → might last 10,000+ cycles</li>
+    <li>A battery discharged to 80% DoD every cycle → might last only 500 cycles</li>
+  </ul>
+
+  <p>For a satellite that orbits Earth 16 times per day, 500 cycles is less than a month. 10,000 cycles is nearly 2 years. This is why PHOENIX focuses on <strong>minimizing DoD</strong>.</p>
+
+  <div class="box box-analogy">
+    <div class="box-title">Analogy — Running shoes</div>
+    Imagine you have a pair of running shoes that can last 500 km. If you run 10 km every day, they last 50 days. If you only run 2 km a day, they last 250 days. Draining your battery deeply is like running 10 km a day — it wears things out faster.
+  </div>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>放电深度 DoD (Depth of Discharge)</strong>：每次使用电池时放掉的电量占总容量的百分比。<br>
+    放电越深（DoD越高），电池老化越快，寿命越短。<br>
+    PHOENIX的核心优化目标就是最小化所有卫星电池的最大DoD，从而延长整个卫星星座的使用寿命。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 7 -->
+<section id="ch7">
+  <span class="chapter-badge">Chapter 7</span>
+  <h2>Task Scheduling — Who Does What, When?</h2>
+
+  <p><strong>Task scheduling</strong> (任务调度) is the problem of deciding: given a list of jobs that need to be done, and a set of workers (or machines) who can do them, <em>which worker should do which job, and when?</em></p>
+
+  <p>You encounter scheduling every day. A hospital needs to schedule doctors for shifts. A factory needs to schedule machines to produce different products. An airline needs to schedule pilots and planes for flights.</p>
+
+  <h3>Why is scheduling hard in this paper?</h3>
+  <p>In PHOENIX, the scheduler must handle all of the following simultaneously:</p>
+  <ul>
+    <li>Hundreds of satellites, each with different sunlight states (some in eclipse, some in sunlight)</li>
+    <li>Thousands of tasks arriving continuously, each with a <strong>deadline</strong> (the task must be done by a certain time)</li>
+    <li>Limited communication links between satellites that change as they move</li>
+    <li>A goal to minimize battery drain across all satellites</li>
+  </ul>
+
+  <div class="box box-key">
+    <div class="box-title">Key Constraint: Deadlines</div>
+    Each task has a <strong>deadline (截止时间)</strong>. For example, a wildfire monitoring task might need to deliver a result within 5 minutes, so emergency responders can act. If the scheduler saves too much battery by delaying tasks, some tasks will miss their deadlines and become useless. PHOENIX must balance <em>energy savings</em> against <em>meeting deadlines</em>.
+  </div>
+
+  <h3>The formal problem (simplified)</h3>
+  <p>The paper calls their scheduling problem the <strong>SEC Battery Energy Optimization (SBEO)</strong> problem. In plain English:</p>
+
+  <div class="box box-key">
+    <div class="box-title">SBEO in Plain English</div>
+    <em>Assign every task to a satellite (or ground station), and decide when each satellite should run each task, such that:
+    <ul style="margin-top:.5em">
+      <li>No task misses its deadline</li>
+      <li>No satellite tries to process two tasks at the same time</li>
+      <li>The worst-case battery drain across all satellites is as small as possible</li>
+    </ul></em>
+  </div>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>任务调度 (task scheduling)</strong>：决定每个任务由谁来处理、什么时间处理。<br>
+    <strong>截止时间 (deadline)</strong>：任务必须在这个时间点之前完成，否则结果就没有价值了。<br>
+    <strong>SBEO问题</strong>：PHOENIX定义的核心优化问题——在满足截止时间的前提下，最小化卫星电池的最大放电深度。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 8 -->
+<section id="ch8">
+  <span class="chapter-badge">Chapter 8</span>
+  <h2>Networks Between Satellites and the Ground</h2>
+
+  <p>Satellites communicate using radio waves. The paper mentions two types of communication links you need to understand:</p>
+
+  <h3>Inter-Satellite Links (ISL) — 星间链路</h3>
+  <p>These are radio connections <em>between satellites</em>. A satellite can send data to a neighboring satellite in the same constellation using ISLs. This is how PHOENIX moves tasks from one satellite to another — the task data travels from satellite A to satellite B via ISL.</p>
+
+  <p>Starlink satellites, for example, use laser-based ISLs that can transmit data at very high speed across thousands of kilometers in space.</p>
+
+  <h3>Ground-Satellite Links (GSL) — 地面卫星链路</h3>
+  <p>These are radio connections <em>between a satellite and a ground station</em>. When a satellite is directly above (or close to) a ground station, it can transmit data downward. This is how a satellite offloads tasks to the ground in PHOENIX.</p>
+
+  <div class="box box-warning">
+    <div class="box-title">Bottleneck Warning</div>
+    The downlink (satellite → ground) has limited bandwidth (传输带宽). If many satellites all try to send data to the same ground station at once, or if one satellite tries to send a huge amount of raw data, the link gets overwhelmed and everything slows down. This is why PHOENIX doesn't simply offload everything to the ground.
+  </div>
+
+  <h3>Visibility — who can talk to whom?</h3>
+  <p>Because satellites are moving, two satellites are not always in radio range of each other. And a satellite is only above a ground station for a short window (maybe 5–10 minutes). The paper models this with a concept called <strong>visibility</strong>: at any given moment, a link between two nodes (satellite-to-satellite or satellite-to-ground) either exists or doesn't, depending on whether they can "see" each other geometrically.</p>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>星间链路 ISL (Inter-Satellite Link)</strong>：卫星之间的无线通信链路，用于卫星间传递数据。<br>
+    <strong>地面卫星链路 GSL (Ground-Satellite Link)</strong>：卫星与地面站之间的通信链路。<br>
+    <strong>可见性 (visibility)</strong>：由于卫星不断移动，某两个节点之间在某时刻是否能建立通信链路，取决于它们在几何位置上是否能"看到"对方。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 9 -->
+<section id="ch9">
+  <span class="chapter-badge">Chapter 9</span>
+  <h2>Why Is This Problem Hard? NP-Hardness</h2>
+
+  <p>The paper proves that the SBEO problem is <strong>NP-hard</strong>. You don't need to understand the mathematics deeply, but you should know what this means so you can appreciate why the authors don't just find the perfect solution.</p>
+
+  <h3>What does NP-hard mean?</h3>
+  <p>A problem is called <strong>NP-hard</strong> if there is no known efficient algorithm that can always find the perfect (optimal) solution in a reasonable amount of time, especially as the problem gets larger. More specifically, as the number of satellites and tasks grows, the time required to find the perfect answer grows so fast that it becomes completely impractical.</p>
+
+  <div class="box box-analogy">
+    <div class="box-title">Analogy — The Traveling Salesman</div>
+    Imagine a delivery driver who must visit 10 cities and return home, taking the shortest possible total route. For 10 cities, there are 10! = 3,628,800 possible routes to check — manageable for a computer. But for 100 cities, the number of possible routes is astronomically large (more than atoms in the observable universe). No computer can check them all. This is an NP-hard problem. You need clever shortcuts ("heuristics") to find a good-enough answer quickly.
+  </div>
+
+  <p>The SBEO problem is similar. With hundreds of satellites and thousands of tasks, finding the mathematically perfect schedule is computationally impossible in real time. So PHOENIX uses <strong>heuristic algorithms</strong> — smart shortcuts that find a very good (but not necessarily perfect) solution fast enough to be useful.</p>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>NP难问题 (NP-hard)</strong>：一类计算复杂性极高的问题，随着问题规模增大，找到最优解所需的计算时间呈爆炸式增长，实际上不可能用暴力穷举求解。<br>
+    解决方法是使用<strong>启发式算法 (heuristic algorithms)</strong>：在合理时间内找到"足够好"的近似解，而不是费时的最优解。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 10 -->
+<section id="ch10">
+  <span class="chapter-badge">Chapter 10</span>
+  <h2>Heuristic Algorithms — Good Enough, Fast Enough</h2>
+
+  <p>Since finding the perfect solution is too slow, the paper uses <strong>heuristic algorithms</strong> (启发式算法). A heuristic is a clever rule of thumb or strategy that usually gives a very good (near-optimal) solution in a short time, without guaranteeing it is the absolute best.</p>
+
+  <p>PHOENIX uses three algorithms together:</p>
+
+  <ol>
+    <li>
+      <strong>Sunlight-Aware Orbit Assignment Algorithm</strong><br>
+      Run once at the mission center, before any tasks arrive. It groups orbits into "alternative sets": orbits that have lots of sunlight are available to receive offloaded tasks from orbits with less sunlight. This pre-assignment prevents all satellites from competing with each other for the same sunlit destinations.
+    </li>
+    <li>
+      <strong>Orbit-Based Offloading Selection Algorithm</strong><br>
+      Run on each satellite when it receives a task. It decides: should I send this task to a ground station, process it locally, or send it to another satellite in my alternative orbit set?
+    </li>
+    <li>
+      <strong>Processing Arrangement Algorithm</strong><br>
+      Once the destination is chosen, this algorithm decides the exact timing: should the satellite process the task immediately (even if in eclipse), or wait until it enters sunlight?
+    </li>
+  </ol>
+
+  <div class="box box-key">
+    <div class="box-title">Why three algorithms instead of one?</div>
+    Breaking a big complex problem into smaller, manageable sub-problems is a classic engineering strategy called <strong>decomposition (问题分解)</strong>. Each algorithm handles one piece of the overall scheduling puzzle. Together, they solve the SBEO problem efficiently.
+  </div>
+
+  <p>The paper also uses a technique called a <strong>knapsack algorithm</strong> — a classic algorithm for fitting the most value into a limited "bag" (here, fitting the most sunlight-heavy orbits into a balanced assignment). You do not need to know the details, just recognize it as a well-known tool from computer science.</p>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>启发式算法 (heuristic algorithm)</strong>：不保证找到最优解，但能在短时间内找到很好的近似解的算法。<br>
+    <strong>问题分解 (decomposition)</strong>：把一个复杂问题拆解成多个简单子问题分别解决的策略。<br>
+    <strong>背包算法 (knapsack algorithm)</strong>：一种经典算法，解决"如何在容量有限的背包里装最多价值物品"的问题。PHOENIX用它来分配轨道资源。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 11 -->
+<section id="ch11">
+  <span class="chapter-badge">Chapter 11</span>
+  <h2>Putting It All Together: The PHOENIX System</h2>
+
+  <p>Now that you understand all the pieces, let's see how PHOENIX combines them. Reading this chapter should make the paper's figures and descriptions much clearer.</p>
+
+  <h3>The name "PHOENIX"</h3>
+  <p>Phoenix is a mythical bird that rises from the ashes — reborn from fire. The authors chose this name because their system exploits solar energy (fire/sunlight) to "revive" battery-depleted satellites by offloading work to sun-powered ones. It is a poetic name for a practical engineering system.</p>
+
+  <h3>The big picture (Figure 5 in the paper)</h3>
+  <p>PHOENIX has two main parts:</p>
+
+  <ul>
+    <li>
+      <strong>Mission Center Controller (centralized, on the ground)</strong><br>
+      A ground computer that knows the entire constellation's status. It predicts which satellites will be in sunlight, pre-assigns orbit groups, and distributes this information to all satellites. It has three sub-modules:
+      <ul>
+        <li><em>Task Publisher</em> — sends tasks out to satellites</li>
+        <li><em>Sunlight Predictor</em> — calculates which satellites will be in sunlight and when</li>
+        <li><em>Orbit Assignment Manager</em> — decides which orbits serve as backup destinations for each other</li>
+      </ul>
+    </li>
+    <li>
+      <strong>On-Board Task Manager (distributed, on each satellite)</strong><br>
+      A program running on every satellite. It receives tasks and sunlight information from the mission center, then uses the offloading and scheduling algorithms to decide what to do with each task:
+      <ul>
+        <li><em>Offloading Manager</em> — decides where to send the task (local, nearby satellite, ground)</li>
+        <li><em>Local Processing Manager</em> — if kept local, decides when to run it (now or delayed)</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>What happens step by step?</h3>
+  <ol>
+    <li>A customer requests a mission (e.g., "monitor this wildfire region for the next 6 hours").</li>
+    <li>The Mission Center predicts sunlight states and assigns orbit groups.</li>
+    <li>As satellites fly over the region of interest, they capture images.</li>
+    <li>Each satellite's on-board manager decides: offload to ground? offload to a sunlit peer? process locally now? process locally later?</li>
+    <li>The task is processed wherever it was sent.</li>
+    <li>The result is sent back to the mission center and the customer.</li>
+  </ol>
+
+  <h3>The key result</h3>
+  <p>The paper shows that PHOENIX reduces battery energy consumption by up to <strong>54.8%</strong> and extends battery lifetime by up to <strong>2.9×</strong> compared to prior approaches — while still completing all tasks on time.</p>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释</div>
+    <strong>PHOENIX系统</strong>总结：<br>
+    地面上的任务中心（Mission Center）负责预测日照、分配轨道资源；<br>
+    每颗卫星上的任务管理器（On-Board Task Manager）负责决定把每个任务交给谁、什么时候处理；<br>
+    两者协同工作，在满足截止时间的前提下，把电池放电深度降到最低，从而大幅延长卫星寿命。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 12 -->
+<section id="ch12">
+  <span class="chapter-badge">Chapter 12</span>
+  <h2>How to Read and Critique This Paper</h2>
+
+  <p>Now that you have the background, here is a practical guide for both <em>reading</em> the paper and thinking critically about it. A good critique does not just say "this is good" or "this is bad" — it identifies <strong>specific strengths and specific limitations</strong> with reasoning.</p>
+
+  <h3>Reading strategy</h3>
+  <ol>
+    <li><strong>Read the Abstract first</strong> — it tells you the problem, the method, and the main result. After reading Chapter 11 above, you should already understand most of it.</li>
+    <li><strong>Read the Introduction</strong> — it motivates the problem and states the contributions clearly. Look for the bullet list of contributions at the end.</li>
+    <li><strong>Skim Section II (Technical Background)</strong> — you now know most of this from Chapters 2 and 4 above.</li>
+    <li><strong>Read Section III (Design Overview)</strong> — this explains the key idea (Figure 4) and the system architecture (Figure 5).</li>
+    <li><strong>Read Section IV carefully</strong> — this is where the math and algorithms are. Focus on understanding what each algorithm does in plain English; you don't need to verify every equation.</li>
+    <li><strong>Read the Evaluation section</strong> — look at the figures and tables. Ask: what baselines did they compare against? What metrics did they use? Are the results convincing?</li>
+  </ol>
+
+  <h3>Strengths to identify</h3>
+  <div class="box box-key">
+    <div class="box-title">Things the paper does well</div>
+    <ul>
+      <li><strong>Novel insight</strong>: The observation that some orbital planes have near-100% sunlit ratio is elegant and practically motivated by real constellation data.</li>
+      <li><strong>Real-world validation</strong>: They build an actual hardware testbed using real satellite hardware (not just simulation), which makes the results more credible.</li>
+      <li><strong>Data-driven evaluation</strong>: They use real trajectory data from Starlink, OneWeb, Iridium NEXT, and Kuiper.</li>
+      <li><strong>NP-hardness proof</strong>: Proving the problem is NP-hard justifies why they use heuristics instead of exact solvers.</li>
+      <li><strong>Significant results</strong>: 54.8% energy reduction and 2.9× battery lifetime extension are impressive numbers.</li>
+    </ul>
+  </div>
+
+  <h3>Limitations and critique angles</h3>
+  <div class="box box-critique">
+    <div class="box-title">Questions and limitations to think about</div>
+    <ul>
+      <li>
+        <strong>Centralized controller assumption</strong>: PHOENIX relies on a centralized Mission Center on the ground that has perfect, up-to-date knowledge of every satellite's sunlight state. In reality, ground station contact windows are limited. What happens when the mission center loses contact with parts of the constellation?
+      </li>
+      <li>
+        <strong>Single task type</strong>: The paper models tasks as having a fixed "computing time" (T_cp). Real satellite applications (AI inference, image compression, signal processing) have very different computational profiles. Does the model generalize?
+      </li>
+      <li>
+        <strong>One task per satellite at a time</strong>: Constraint (8) says a satellite can only process one task per time slot. Modern onboard processors can actually parallelize work. This may make the results more conservative than necessary, or may not reflect real hardware behavior.
+      </li>
+      <li>
+        <strong>No failure model</strong>: What if a satellite fails, a link drops, or the solar panel is damaged? The paper does not model hardware failures, which are not rare in space.
+      </li>
+      <li>
+        <strong>Testbed scale</strong>: The hardware testbed uses a small number of physical nodes to simulate a large constellation. The paper uses simulation for the large-scale results. The gap between simulation and actual deployment is not fully characterized.
+      </li>
+      <li>
+        <strong>Security</strong>: Task scheduling in a multi-operator constellation raises questions about whether malicious actors could exploit the offloading mechanism. This is not addressed.
+      </li>
+    </ul>
+  </div>
+
+  <div class="box box-warning">
+    <div class="box-title">A tip for critiquing</div>
+    A good critique always acknowledges what the paper <em>does not claim to do</em>. If the authors themselves say "we leave X for future work," then criticizing X is less impactful than finding a gap they did not acknowledge. Read the "Conclusion" and "Limitations" sections carefully.
+  </div>
+
+  <div class="box box-chinese">
+    <div class="box-title">中文注释 — 如何批判性地阅读论文</div>
+    批判性阅读不是"挑毛病"，而是系统地识别论文的<strong>贡献</strong>和<strong>局限性</strong>：<br><br>
+    <strong>贡献（要肯定的）：</strong>创新洞察、真实硬件验证、数据驱动、证明了问题的NP难性。<br><br>
+    <strong>局限性（可以质疑的）：</strong>依赖中心化控制器（地面失联怎么办？）、任务模型简化（真实任务更复杂）、不支持并行处理、没有故障模型、仿真规模与实际部署有差距。
+  </div>
+</section>
+
+<hr class="section"/>
+
+<!-- ═══════════════════════════════════════════════════════ CH 13 -->
+<section id="ch13">
+  <span class="chapter-badge">Chapter 13</span>
+  <h2>Quick Glossary</h2>
+
+  <table>
+    <tr>
+      <th>Term</th>
+      <th>Plain English meaning</th>
+      <th>中文</th>
+    </tr>
+    <tr>
+      <td><strong>LEO</strong></td>
+      <td>Low Earth Orbit — 500–2,000 km altitude</td>
+      <td>低地球轨道</td>
+    </tr>
+    <tr>
+      <td><strong>Constellation</strong></td>
+      <td>A large group of satellites working together</td>
+      <td>卫星星座</td>
+    </tr>
+    <tr>
+      <td><strong>Solar panel</strong></td>
+      <td>Device that converts sunlight into electricity</td>
+      <td>太阳能板</td>
+    </tr>
+    <tr>
+      <td><strong>Eclipse phase</strong></td>
+      <td>When a satellite is in Earth's shadow — no solar power</td>
+      <td>地影期</td>
+    </tr>
+    <tr>
+      <td><strong>Sunlight phase</strong></td>
+      <td>When a satellite is illuminated — solar power available</td>
+      <td>日照期</td>
+    </tr>
+    <tr>
+      <td><strong>DoD</strong></td>
+      <td>Depth of Discharge — how deeply a battery is drained</td>
+      <td>放电深度</td>
+    </tr>
+    <tr>
+      <td><strong>Edge computing</strong></td>
+      <td>Processing data close to where it is created</td>
+      <td>边缘计算</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud computing</strong></td>
+      <td>Processing data on powerful remote servers</td>
+      <td>云计算</td>
+    </tr>
+    <tr>
+      <td><strong>SEC</strong></td>
+      <td>Space Edge Computing — edge computing done on satellites</td>
+      <td>空间边缘计算</td>
+    </tr>
+    <tr>
+      <td><strong>Task offloading</strong></td>
+      <td>Sending a computing job to another device to process</td>
+      <td>任务卸载</td>
+    </tr>
+    <tr>
+      <td><strong>Deadline</strong></td>
+      <td>The latest time by which a task must be completed</td>
+      <td>截止时间</td>
+    </tr>
+    <tr>
+      <td><strong>ISL</strong></td>
+      <td>Inter-Satellite Link — radio connection between satellites</td>
+      <td>星间链路</td>
+    </tr>
+    <tr>
+      <td><strong>GSL</strong></td>
+      <td>Ground-Satellite Link — radio connection between satellite and ground</td>
+      <td>地面卫星链路</td>
+    </tr>
+    <tr>
+      <td><strong>Sunlit ratio</strong></td>
+      <td>Fraction of orbital time a satellite spends in sunlight</td>
+      <td>日照比</td>
+    </tr>
+    <tr>
+      <td><strong>NP-hard</strong></td>
+      <td>A class of problems with no known efficient optimal algorithm</td>
+      <td>NP难问题</td>
+    </tr>
+    <tr>
+      <td><strong>Heuristic</strong></td>
+      <td>A smart shortcut that finds good (not perfect) solutions quickly</td>
+      <td>启发式算法</td>
+    </tr>
+    <tr>
+      <td><strong>SBEO</strong></td>
+      <td>SEC Battery Energy Optimization — the core problem PHOENIX solves</td>
+      <td>空间边缘计算电池能量优化问题</td>
+    </tr>
+    <tr>
+      <td><strong>PHOENIX</strong></td>
+      <td>The name of the paper's system — a sunlight-aware task scheduler</td>
+      <td>本文提出的日照感知任务调度框架</td>
+    </tr>
+    <tr>
+      <td><strong>Bandwidth</strong></td>
+      <td>The maximum rate of data transmission on a link</td>
+      <td>带宽</td>
+    </tr>
+    <tr>
+      <td><strong>Knapsack algorithm</strong></td>
+      <td>Classic algorithm for fitting the most value into a limited container</td>
+      <td>背包算法</td>
+    </tr>
+  </table>
+</section>
+
+<hr class="section"/>
+
+<footer>
+  <p>This booklet was written as a companion to:<br>
+  <em>Liu et al., "In-Orbit Processing or Not? Sunlight-Aware Task Scheduling for Energy-Efficient Space Edge Computing Networks," IEEE INFOCOM 2024.</em><br>
+  DOI: 10.1109/INFOCOM52122.2024.10621268</p>
+  <p style="margin-top:1em">Written for a reader with no engineering background. Concepts simplified for clarity.</p>
+</footer>
+
+</body>
+</html>
