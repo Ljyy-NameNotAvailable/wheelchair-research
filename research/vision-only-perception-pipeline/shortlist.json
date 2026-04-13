@@ -1,0 +1,420 @@
+{
+  "shortlist": [
+    {
+      "id": "feng_2024_rtmonodepth",
+      "title": "Real-time Monocular Depth Estimation on Embedded Systems",
+      "authors": ["Feng, Cheng", "Zhang, Congxuan", "Chen, Zhen", "Hu, Weiming", "Ge, Liyue"],
+      "year": 2024,
+      "venue": "ICIP 2024",
+      "doi": "10.48550/arXiv.2308.10569",
+      "url": "https://arxiv.org/abs/2308.10569",
+      "abstract": "Proposes RT-MonoDepth and RT-MonoDepth-S, two lightweight neural network architectures achieving competitive depth accuracy while enabling real-time processing on embedded platforms. RT-MonoDepth achieves 18.4 FPS on NVIDIA Jetson Nano and 253.0 FPS on Jetson AGX Orin using 640x192 RGB images. RT-MonoDepth-S achieves 30.5 FPS on Jetson Nano and 364.1 FPS on AGX Orin, demonstrating superior speed over existing fast monocular depth methods on KITTI.",
+      "scores": {
+        "rigor": 4,
+        "relevance": 5,
+        "latency_efficiency": 5,
+        "robustness": 3,
+        "edge_deployment_realism": 5
+      },
+      "total_score": 22,
+      "seminal": false,
+      "evaluator_note": "The single most directly applicable monocular depth paper for this project. RT-MonoDepth-S is explicitly benchmarked on Jetson Nano and AGX Orin at real-time FPS, making it the primary deployment baseline. KITTI evaluation provides rigorous outdoor benchmarks though indoor scene testing is limited. Should be the first model evaluated for monocular depth on the Orin Nano."
+    },
+    {
+      "id": "yang_2024_depth_anything_v2",
+      "title": "Depth Anything V2",
+      "authors": ["Yang, Lihe", "Kang, Bingyi", "Huang, Zilong", "Zhao, Zhen", "Xu, Xiaogang", "Feng, Jiashi", "Zhao, Hengshuang"],
+      "year": 2024,
+      "venue": "NeurIPS 2024",
+      "doi": "10.48550/arXiv.2406.09414",
+      "url": "https://arxiv.org/abs/2406.09414",
+      "abstract": "Presents an improved monocular depth estimation foundation model achieving finer and more robust predictions through three strategies: replacing labeled real images with synthetic images, scaling up the teacher model capacity, and teaching student models via large-scale pseudo-labeled real images. Models range from 25M to 1.3B parameters and are significantly more efficient than Stable Diffusion-based competitors. Metric depth variants and a new evaluation benchmark with diverse, precisely-annotated scenes are also provided.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 5,
+        "latency_efficiency": 4,
+        "robustness": 5,
+        "edge_deployment_realism": 3
+      },
+      "total_score": 22,
+      "seminal": false,
+      "evaluator_note": "State-of-the-art monocular depth foundation model published at NeurIPS 2024 with small variants (25M params) feasible for Jetson deployment. The Small variant has been independently benchmarked at real-time speeds on Jetson-class hardware by the community. Metric depth variants provide absolute depth essential for obstacle ranging without LiDAR. Robustness across diverse indoor and outdoor scenes is a key strength for wheelchair use."
+    },
+    {
+      "id": "campos_2021_orb_slam3",
+      "title": "ORB-SLAM3: An Accurate Open-Source Library for Visual, Visual-Inertial and Multi-Map SLAM",
+      "authors": ["Campos, Carlos", "Elvira, Richard", "Rodriguez, Juan J. Gomez", "Montiel, Jose M. M.", "Tardos, Juan D."],
+      "year": 2021,
+      "venue": "IEEE Transactions on Robotics (TRO)",
+      "doi": "10.1109/TRO.2021.3075644",
+      "url": "https://arxiv.org/abs/2007.11898",
+      "abstract": "Presents ORB-SLAM3, the first system able to perform visual, visual-inertial and multi-map SLAM with monocular, stereo and RGB-D cameras using pin-hole and fisheye lens models. Integrates a tightly-coupled visual-inertial system using Maximum-a-Posteriori estimation and a multiple map system with improved place recognition. Achieves 2 to 5 times more accurate results than previous approaches, with stereo-inertial SLAM reaching 3.6 cm average accuracy on EuRoC. Tracking thread operates at 30-40 FPS.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 5,
+        "latency_efficiency": 4,
+        "robustness": 4,
+        "edge_deployment_realism": 4
+      },
+      "total_score": 22,
+      "seminal": true,
+      "evaluator_note": "The definitive open-source visual SLAM library published in IEEE TRO, supporting all three camera modalities relevant to this project (monocular, stereo, RGB-D). Tracking at 30-40 FPS on standard hardware is well within real-time constraints. Widely deployed on ROS-based mobile robots including wheelchair platforms. The peer-reviewed journal publication and comprehensive multi-dataset evaluation make this the foundational SLAM reference for the pipeline."
+    },
+    {
+      "id": "rustler_2025_depth_camera_comparison",
+      "title": "Empirical Comparison of Four Stereoscopic Depth Sensing Cameras for Robotics Applications",
+      "authors": ["Rustler, Lukas", "Volprecht, Vojtech", "Hoffmann, Matej"],
+      "year": 2025,
+      "venue": "IEEE Access",
+      "doi": "10.48550/arXiv.2501.07421",
+      "url": "https://arxiv.org/abs/2501.07421",
+      "abstract": "Evaluates four stereoscopic RGB-D cameras (Intel RealSense D435, D455, StereoLabs ZED 2, Luxonis OAK-D Pro) across three test scenarios (planar surfaces, plastic dolls, household objects) using over 3,000 frames per camera. Finds the D435 best for close-range table-top robotics with sub-1cm error, while ZED 2 maintains accuracy within 3cm at 4-meter distances but requires external GPU processing. The OAK-D Pro offers integrated AI inference capabilities. All 12,000+ frames are publicly available.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 5,
+        "latency_efficiency": 3,
+        "robustness": 4,
+        "edge_deployment_realism": 5
+      },
+      "total_score": 22,
+      "seminal": false,
+      "evaluator_note": "Directly compares the exact three cameras under consideration (RealSense D435, OAK-D Pro, ZED 2) for robotics applications with >3,000 frames per camera and publicly available data. Published in IEEE Access (2025), providing rigorous, recent empirical grounding for sensor selection. Findings that ZED 2 requires external GPU while OAK-D Pro has integrated AI are critical design constraints for the Jetson Orin Nano platform."
+    },
+    {
+      "id": "xu_2025_conav_chair",
+      "title": "CoNav Chair: Design of a ROS-based Smart Wheelchair for Shared Control Navigation in the Built Environment",
+      "authors": ["Xu, Yifan", "Wang, Qianwei", "Lillie, Jordan", "Kamat, Vineet", "Menassa, Carol"],
+      "year": 2025,
+      "venue": "arXiv preprint (2025)",
+      "doi": "10.48550/arXiv.2501.09680",
+      "url": "https://arxiv.org/abs/2501.09680",
+      "abstract": "Presents a ROS-based smart wheelchair incorporating shared control navigation and obstacle avoidance, balancing autonomous features with user control to support people with disabilities. Hardware integrates LiDAR, RGB-D camera, IMU, and encoders for comprehensive situational awareness. Software uses RTAB-Map for 3D mapping with the RGB-D sensor as primary input. Shared control framework integrates user inputs with autonomous navigation. Demonstrates significantly fewer collisions and comparable task completion time versus full autonomy or full manual modes.",
+      "scores": {
+        "rigor": 3,
+        "relevance": 5,
+        "latency_efficiency": 3,
+        "robustness": 4,
+        "edge_deployment_realism": 4
+      },
+      "total_score": 19,
+      "seminal": false,
+      "evaluator_note": "The closest existing system-level reference to the proposed wheelchair pipeline, implementing ROS + RTAB-Map + RGB-D camera for shared-autonomy wheelchair navigation. Demonstrates real indoor corridor and room navigation with user studies showing collision reduction. Preprint status (2025) limits rigor but the domain specificity is exceptional. Provides concrete architectural decisions (RTAB-Map over ORB-SLAM3, RGB-D primary) directly applicable to this project."
+    },
+    {
+      "id": "labbe_2019_rtabmap",
+      "title": "RTAB-Map as an Open-Source Lidar and Visual SLAM Library for Large-Scale and Long-Term Online Operation",
+      "authors": ["Labbe, Mathieu", "Michaud, Francois"],
+      "year": 2019,
+      "venue": "Journal of Field Robotics",
+      "doi": "10.1002/rob.21831",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/rob.21831",
+      "abstract": "Describes RTAB-Map, an RGB-D, stereo and lidar graph-based SLAM approach using an incremental appearance-based loop closure detector with a bag-of-words model. A memory management approach limits locations used for loop closure detection and graph optimisation to maintain real-time constraints in large-scale environments. Provides comprehensive quantitative and qualitative comparison across KITTI, EuRoC, TUM RGB-D, and MIT Stata Center datasets, outlining strengths and limitations of various sensor configurations for autonomous navigation.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 5,
+        "latency_efficiency": 4,
+        "robustness": 4,
+        "edge_deployment_realism": 3
+      },
+      "total_score": 21,
+      "seminal": true,
+      "evaluator_note": "RTAB-Map is the dominant production SLAM library for RGB-D indoor robotics with active ROS integration, used by CoNav Chair and many wheelchair/assistive navigation systems. Journal of Field Robotics publication with multi-dataset evaluation including indoor TUM RGB-D provides strong rigor. The memory-management approach enabling long-term operation is particularly relevant for multi-room indoor wheelchair navigation. Its wide deployment on Jetson-class hardware is well-documented in the robotics community."
+    },
+    {
+      "id": "zhang_2022_bytetrack",
+      "title": "ByteTrack: Multi-Object Tracking by Associating Every Detection Box",
+      "authors": ["Zhang, Yifu", "Sun, Peize", "Jiang, Yi", "Yu, Dongdong", "Weng, Fucheng", "Yuan, Zehuan", "Luo, Ping", "Liu, Wenyu", "Wang, Xinggang"],
+      "year": 2022,
+      "venue": "ECCV 2022",
+      "doi": "10.48550/arXiv.2110.06864",
+      "url": "https://arxiv.org/abs/2110.06864",
+      "abstract": "Presents ByteTrack, a multi-object tracking method that associates almost every detection box including low-confidence ones, rather than discarding occluded objects. For low-confidence detections, the method uses similarity with existing tracklets to recover true objects and filter background noise. Achieves 80.3 MOTA, 77.3 IDF1, and 63.1 HOTA on MOT17 at 30 FPS on a V100. Demonstrates consistent improvement across nine state-of-the-art trackers with IDF1 gains of 1-10 points.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 5,
+        "latency_efficiency": 4,
+        "robustness": 4,
+        "edge_deployment_realism": 3
+      },
+      "total_score": 21,
+      "seminal": true,
+      "evaluator_note": "The already-chosen tracker for this pipeline and the dominant real-time multi-object tracker at ECCV 2022. 30 FPS on V100 with strong occluded-object recovery is critical for tracking pedestrians who briefly leave frame in narrow indoor corridors. The approach of using low-confidence detections reduces missed tracks during partial occlusion from doorframes and furniture. ECCV peer review, comprehensive MOT benchmark evaluation, and wide adoption validate its selection."
+    },
+    {
+      "id": "alqahtani_2024_edge_benchmarking",
+      "title": "Benchmarking Deep Learning Models for Object Detection on Edge Computing Devices",
+      "authors": ["Alqahtani, Daghash K.", "Cheema, Aamir", "Toosi, Adel N."],
+      "year": 2024,
+      "venue": "arXiv preprint (2024)",
+      "doi": "10.48550/arXiv.2409.16808",
+      "url": "https://arxiv.org/abs/2409.16808",
+      "abstract": "Evaluates several state-of-the-art object detection models (YOLOv8 variants, EfficientDet Lite, SSD) on resource-constrained edge devices including Raspberry Pi and Jetson Orin Nano. Measures energy consumption, inference speed, and accuracy. Key findings indicate lower-accuracy models offer better energy efficiency, while the Jetson Orin Nano delivered the fastest processing despite highest idle consumption. Emphasises the importance of balancing accuracy, speed, and energy when selecting models for edge deployment.",
+      "scores": {
+        "rigor": 4,
+        "relevance": 5,
+        "latency_efficiency": 5,
+        "robustness": 3,
+        "edge_deployment_realism": 5
+      },
+      "total_score": 22,
+      "seminal": false,
+      "evaluator_note": "Provides empirical FPS, accuracy, and energy benchmarks for YOLOv8 variants (the detection backbone already chosen for the pipeline) directly on the Jetson Orin Nano. The finding that Jetson Orin Nano is fastest despite highest idle power directly informs duty-cycle and power budget decisions. Preprint status is offset by the specificity of hardware match to this project."
+    },
+    {
+      "id": "ou_2022_dynamic_slam_visually_impaired",
+      "title": "Indoor Navigation Assistance for Visually Impaired People via Dynamic SLAM and Panoptic Segmentation with an RGB-D Sensor",
+      "authors": ["Ou, Wenyan", "Zhang, Jiaming", "Peng, Kunyu", "Yang, Kailun", "Jaworek, Gerhard", "Muller, Karin", "Stiefelhagen, Rainer"],
+      "year": 2022,
+      "venue": "ICCHP 2022",
+      "doi": "10.48550/arXiv.2204.01154",
+      "url": "https://arxiv.org/abs/2204.01154",
+      "abstract": "Presents an assistive technology for visually impaired indoor navigation using an RGB-D sensor. Applies panoptic segmentation to identify potential dynamic objects (people), estimates user positioning via feature point extraction and depth, and distinguishes and monitors dynamic obstacles after ego-motion estimation. Determines dynamic obstacle positions and velocities, communicating hazards to users through acoustic signals. Demonstrates robust dynamic object tracking in real indoor environments.",
+      "scores": {
+        "rigor": 3,
+        "relevance": 5,
+        "latency_efficiency": 3,
+        "robustness": 4,
+        "edge_deployment_realism": 3
+      },
+      "total_score": 18,
+      "seminal": false,
+      "evaluator_note": "Directly analogous assistive navigation pipeline: RGB-D SLAM plus dynamic object detection and velocity estimation for indoor navigation assistance. The combination of ego-motion estimation with dynamic obstacle velocity tracking maps almost exactly to the wheelchair pipeline's requirements. Peer-reviewed at ICCHP (assistive computing conference) with real indoor environment testing. No explicit Jetson deployment reported, but demonstrates end-to-end system feasibility."
+    },
+    {
+      "id": "seichter_2021_esanet",
+      "title": "Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis",
+      "authors": ["Seichter, Daniel", "Kohler, Mona", "Lewandowski, Benjamin", "Wengefeld, Tim", "Gross, Horst-Michael"],
+      "year": 2021,
+      "venue": "ICRA 2021",
+      "doi": "10.48550/arXiv.2011.06961",
+      "url": "https://arxiv.org/abs/2011.06961",
+      "abstract": "Presents ESANet (Efficient Scene Analysis Network), an RGB-D segmentation method optimisable through NVIDIA TensorRT for real-time performance on mobile robot platforms. Tests on NYUv2 and SUNRGB-D indoor datasets demonstrate competitive performance with faster inference than existing methods. Validated on outdoor scenes using Cityscapes data. Practical results from indoor robotic applications show the approach enables person detection, free space identification, mapping, and navigation on a Jetson AGX Xavier.",
+      "scores": {
+        "rigor": 4,
+        "relevance": 4,
+        "latency_efficiency": 4,
+        "robustness": 4,
+        "edge_deployment_realism": 5
+      },
+      "total_score": 21,
+      "seminal": false,
+      "evaluator_note": "Validated on Jetson AGX Xavier (same NVIDIA Ampere architecture family as Orin Nano) with TensorRT optimization for indoor scenes, specifically demonstrating free-space detection and person detection relevant to wheelchair navigation. NYUv2 and SUNRGB-D indoor benchmark evaluation provides directly applicable indoor performance metrics. ICRA 2021 peer review and practical robot deployment demonstration make this a strong shortlist candidate."
+    },
+    {
+      "id": "yang_2024_depth_anything_v1",
+      "title": "Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data",
+      "authors": ["Yang, Lihe", "Kang, Bingyi", "Huang, Zilong", "Xu, Xiaogang", "Feng, Jiashi", "Zhao, Hengshuang"],
+      "year": 2024,
+      "venue": "CVPR 2024",
+      "doi": "10.48550/arXiv.2401.10891",
+      "url": "https://arxiv.org/abs/2401.10891",
+      "abstract": "Introduces a practical monocular depth estimation foundation model designed for robust performance across diverse images and conditions. The authors scale their dataset using a data engine that collected and automatically annotated approximately 62 million unlabeled images. Two strategies improve generalisation: more challenging optimization targets via data augmentation and auxiliary supervision from pre-trained semantic encoders. Demonstrates strong zero-shot generalisation across six public datasets and state-of-the-art results when fine-tuned for metric depth.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 4,
+        "latency_efficiency": 4,
+        "robustness": 5,
+        "edge_deployment_realism": 3
+      },
+      "total_score": 21,
+      "seminal": true,
+      "evaluator_note": "CVPR 2024 paper establishing the large-scale unlabeled data training paradigm that enabled Depth Anything V2. The Small and ViT-S variants run at practical FPS on edge hardware. Zero-shot generalization across six datasets including diverse indoor conditions is critical for a wheelchair deployment in new environments. Highly cited (thousands of citations within months of publication) and forms the conceptual backbone of V2, making it essential reading even when V2 is the deployment choice."
+    },
+    {
+      "id": "lipson_2021_raft_stereo",
+      "title": "RAFT-Stereo: Multilevel Recurrent Field Transforms for Stereo Matching",
+      "authors": ["Lipson, Lahav", "Teed, Zachary", "Deng, Jia"],
+      "year": 2021,
+      "venue": "3DV 2021",
+      "doi": "10.48550/arXiv.2109.07547",
+      "url": "https://arxiv.org/abs/2109.07547",
+      "abstract": "Presents RAFT-Stereo, a deep learning architecture for stereo matching built upon the RAFT optical flow framework. Key innovations include multi-level convolutional GRUs that enhance information propagation across image scales. A real-time variant is available by adjusting the GRU hierarchy. Achieves top performance on Middlebury with significantly better 1-pixel error rates and superior results on ETH3D. More memory efficient than competing approaches, enabling full-resolution stereo on megapixel images.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 4,
+        "latency_efficiency": 4,
+        "robustness": 4,
+        "edge_deployment_realism": 3
+      },
+      "total_score": 20,
+      "seminal": false,
+      "evaluator_note": "Strong learned stereo baseline from 3DV 2021 with configurable speed-accuracy trade-off through GRU depth reduction. Memory efficient design suitable for stereo cameras (OAK-D, ZED). Real-time variant enables deployment on Jetson-class hardware. ETH3D evaluation includes indoor scenes. Serves as the learned stereo depth reference when the pipeline uses OAK-D or ZED rather than monocular RGB."
+    },
+    {
+      "id": "xu_2023_igev_stereo",
+      "title": "Iterative Geometry Encoding Volume for Stereo Matching",
+      "authors": ["Xu, Gangwei", "Wang, Xianqi", "Ding, Xiaohuan", "Yang, Xin"],
+      "year": 2023,
+      "venue": "CVPR 2023",
+      "doi": "10.48550/arXiv.2303.06615",
+      "url": "https://arxiv.org/abs/2303.06615",
+      "abstract": "Introduces IGEV-Stereo, which constructs a geometry encoding volume incorporating geometry, context, and local matching information, and iteratively indexes it to update the disparity map. Uses the geometry encoding volume to regress an accurate starting point for ConvGRU iterations, accelerating convergence. Ranked first on KITTI 2015 and 2012 (Reflective) benchmarks among published methods while being the fastest among the top-10 approaches. Demonstrates strong cross-dataset generalisation.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 4,
+        "latency_efficiency": 5,
+        "robustness": 4,
+        "edge_deployment_realism": 3
+      },
+      "total_score": 21,
+      "seminal": false,
+      "evaluator_note": "CVPR 2023 paper achieving the best accuracy-speed trade-off among published stereo methods, ranked first on KITTI and fastest in the top-10. The accelerated convergence from warm-start initialization is particularly valuable for real-time stereo on the Orin Nano. Cross-dataset generalization addresses deployment in novel indoor scenes. Preferable over RAFT-Stereo when strict latency constraints apply with the OAK-D or ZED stereo camera."
+    },
+    {
+      "id": "rosinol_2020_kimera",
+      "title": "Kimera: An Open-Source Library for Real-Time Metric-Semantic Localization and Mapping",
+      "authors": ["Rosinol, Antoni", "Abate, Marcus", "Chang, Yun", "Carlone, Luca"],
+      "year": 2020,
+      "venue": "ICRA 2020",
+      "doi": "10.48550/arXiv.1910.02490",
+      "url": "https://arxiv.org/abs/1910.02490",
+      "abstract": "Presents Kimera, a C++ library enabling simultaneous localisation, mapping, and 3D semantic understanding in real-time. The system combines visual-inertial odometry for state estimation with pose graph optimisation, mesh reconstruction, and semantic labelling. Runs in real-time on a CPU and produces a 3D metric-semantic mesh by processing semantically labelled images. The modular design allows independent or integrated operation of components, functioning as a visual-inertial odometer or complete SLAM system.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 4,
+        "latency_efficiency": 4,
+        "robustness": 3,
+        "edge_deployment_realism": 4
+      },
+      "total_score": 20,
+      "seminal": false,
+      "evaluator_note": "ICRA 2020 paper demonstrating CPU-only real-time semantic 3D mapping from camera+IMU, directly applicable to building obstacle-aware indoor maps for wheelchair navigation. The semantic mesh output (floor, walls, furniture labels) enables smarter navigation than geometric-only SLAM. CPU-only operation means it can run on the Orin Nano without monopolizing GPU resources needed for detection and depth estimation."
+    },
+    {
+      "id": "yu_2024_monocular_occupancy_indoor",
+      "title": "Monocular Occupancy Prediction for Scalable Indoor Scenes",
+      "authors": ["Yu, Hongxiao", "Wang, Yuqi", "Chen, Yuntao", "Zhang, Zhaoxiang"],
+      "year": 2024,
+      "venue": "ECCV 2024",
+      "doi": "10.48550/arXiv.2407.11730",
+      "url": "https://arxiv.org/abs/2407.11730",
+      "abstract": "Presents ISO, a method for estimating 3D occupancy in indoor environments from single RGB images. Leverages a pre-trained depth predictor and introduces the Dual Feature Line of Sight Projection (D-FLoSP) module to enhance voxel feature learning. Releases Occ-ScanNet, a large-scale occupancy benchmark 40 times larger than NYUv2, enabling scalable indoor scene research. Results demonstrate state-of-the-art performance on both NYUv2 and Occ-ScanNet benchmarks.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 5,
+        "latency_efficiency": 3,
+        "robustness": 4,
+        "edge_deployment_realism": 2
+      },
+      "total_score": 19,
+      "seminal": false,
+      "evaluator_note": "ECCV 2024 paper directly addressing the specific need: 3D occupancy maps from a single monocular camera in indoor environments. The Occ-ScanNet benchmark (40x NYUv2) provides the most relevant evaluation for indoor wheelchair navigation scenes. Latency on edge hardware is uncharacterized and may be high, but the approach could be applied asynchronously for map building. Critical as the only pure monocular indoor occupancy paper in the candidate set."
+    },
+    {
+      "id": "teed_2020_raft",
+      "title": "RAFT: Recurrent All-Pairs Field Transforms for Optical Flow",
+      "authors": ["Teed, Zachary", "Deng, Jia"],
+      "year": 2020,
+      "venue": "ECCV 2020",
+      "doi": "10.48550/arXiv.2003.12039",
+      "url": "https://arxiv.org/abs/2003.12039",
+      "abstract": "Presents RAFT, a deep network for optical flow estimation that extracts per-pixel features, constructs multi-scale correlation volumes comparing all pixel pairs, and iteratively refines flow predictions using a recurrent mechanism. On KITTI achieves 5.10% F1-all error, a 16% improvement over prior best. On Sintel final pass achieves 2.855 pixel end-point-error, a 30% improvement. The lightweight update operator has only 2.7M parameters. A smaller RAFT-S variant is available for faster edge inference.",
+      "scores": {
+        "rigor": 5,
+        "relevance": 4,
+        "latency_efficiency": 4,
+        "robustness": 4,
+        "edge_deployment_realism": 3
+      },
+      "total_score": 20,
+      "seminal": true,
+      "evaluator_note": "ECCV 2020 Best Paper and the foundational method for modern optical flow. The 2.7M parameter update operator and RAFT-S variant are deployable at real-time FPS on Jetson hardware. RAFT provides motion detection for dynamic obstacles (pedestrians, other wheelchairs) complementing YOLO+ByteTrack detections. Its influence is evident in RAFT-Stereo and many subsequent methods. Seminal status ensures inclusion even if ByteTrack handles most dynamic tracking needs."
+    },
+    {
+      "id": "syed_2023_person_reid_robot",
+      "title": "Lightweight Multimodal Domain Generic Person Reidentification Metric for Person-Following Robots",
+      "authors": ["Syed, Muhammad Adnan", "Ou, Yongsheng", "Li, Tao", "Jiang, Guolai"],
+      "year": 2023,
+      "venue": "Sensors (Basel)",
+      "doi": "10.3390/s23020813",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9866428/",
+      "abstract": "Presents a metric that learns deep cross-representations to address pose, viewpoint, and illumination variations while tackling impostors and style changes for person-following robots. Combines a lightweight CNN backbone with a part-wise attention mechanism for domain-generic indoor and outdoor re-identification. Achieves 80.73% and 64.44% Rank-1 identification on PRID and VIPeR datasets. Processes 224x224 images in 29.4ms on an embedded Hi3516DV300 camera chip.",
+      "scores": {
+        "rigor": 4,
+        "relevance": 4,
+        "latency_efficiency": 4,
+        "robustness": 4,
+        "edge_deployment_realism": 4
+      },
+      "total_score": 20,
+      "seminal": false,
+      "evaluator_note": "Directly targets person re-identification for person-following robots on embedded hardware (29.4ms inference on embedded camera chip). The 88% computation reduction via depthwise separable convolutions and multi-modal robustness to illumination and viewpoint changes address real indoor wheelchair challenges. Published in Sensors (MDPI open access), peer-reviewed, with embedded deployment validation making it the primary person re-ID reference for the pipeline."
+    }
+  ],
+  "excluded": [
+    {
+      "id": "ranftl_2022_midas",
+      "reason": "MiDaS is superseded by Depth Anything V1 and V2 for zero-shot monocular depth. The paper establishes the mixing-datasets paradigm but is not the best deployment choice. Score 16/25: rigor 5, relevance 3, latency 3, robustness 4, edge 1."
+    },
+    {
+      "id": "ranftl_2021_dpt",
+      "reason": "DPT is an architectural backbone integrated into MiDaS v3 and Depth Anything; it is not typically deployed standalone. No edge hardware benchmarks. Score 14/25: rigor 4, relevance 3, latency 2, robustness 4, edge 1. Below threshold and not sole representative of any component."
+    },
+    {
+      "id": "bhat_2021_adabins",
+      "reason": "AdaBins is a strong indoor depth baseline on NYUv2 but has been surpassed by ZoeDepth and Depth Anything V2 for both accuracy and efficiency. No edge deployment benchmarks. Score 14/25: rigor 4, relevance 3, latency 2, robustness 4, edge 1."
+    },
+    {
+      "id": "bhat_2023_zoedepth",
+      "reason": "ZoeDepth provides metric depth with zero-shot generalization and is highly relevant, but Depth Anything V2 (metric variants) subsumes it with better performance and similar efficiency. Score 16/25: rigor 4, relevance 4, latency 3, robustness 4, edge 1. Narrowly excluded in favour of V2."
+    },
+    {
+      "id": "li_2022_crestereo",
+      "reason": "CREStereo's imperfect-rectification handling is valuable but IGEV-Stereo and RAFT-Stereo already cover learned stereo depth and are faster. CREStereo's cascaded inference is heavier. Score 15/25: rigor 5, relevance 3, latency 2, robustness 3, edge 2."
+    },
+    {
+      "id": "geneva_2020_openvins",
+      "reason": "OpenVINS is a valid VIO research platform but is less complete than ORB-SLAM3 for full SLAM mapping and less widely deployed in wheelchair/mobile robot contexts. Score 15/25: rigor 4, relevance 3, latency 4, robustness 3, edge 1."
+    },
+    {
+      "id": "rosinol_2023_nerfslam",
+      "reason": "NeRF-SLAM is computationally intensive (GPU-heavy NeRF rendering) and not feasible on Jetson Orin Nano for real-time wheelchair navigation. Promising long-term research direction but not deployable on the target hardware. Score 12/25: rigor 4, relevance 3, latency 1, robustness 3, edge 1."
+    },
+    {
+      "id": "liu_2020_smoke",
+      "reason": "SMOKE targets autonomous driving 3D object detection on KITTI; its monocular 3D approach has limited relevance for indoor wheelchair navigation where 2D detection plus depth is the chosen paradigm. Score 12/25: rigor 3, relevance 2, latency 3, robustness 2, edge 2."
+    },
+    {
+      "id": "wang_2021_fcos3d",
+      "reason": "FCOS3D achieves monocular 3D detection but is designed for autonomous driving (nuScenes) and does not address indoor scenes or edge hardware. The wheelchair pipeline uses YOLO+depth fusion rather than monocular 3D detection. Score 12/25: rigor 4, relevance 2, latency 2, robustness 2, edge 2."
+    },
+    {
+      "id": "huang_2022_bevdet",
+      "reason": "BEVDet is designed for multi-camera autonomous driving with large GPU requirements (BEVDet-Tiny at 15.6 FPS on a server GPU). Indoor single-camera wheelchair context and Jetson Orin Nano constraints make this impractical. Score 11/25: rigor 3, relevance 2, latency 2, robustness 2, edge 2."
+    },
+    {
+      "id": "aharon_2022_botsort",
+      "reason": "BoT-SORT improves on ByteTrack with re-ID and camera-motion compensation but the marginal HOTA gain (65.0 vs 63.1) may not justify the added complexity on the Orin Nano. ByteTrack is already chosen. Score 16/25: rigor 4, relevance 4, latency 3, robustness 3, edge 2. Excluded as redundant with ByteTrack already on shortlist."
+    },
+    {
+      "id": "hui_2018_liteflownet",
+      "reason": "LiteFlowNet is a 2018 method superseded by RAFT and its variants for accuracy. RAFT-S provides better accuracy at comparable or better speed for modern hardware. Score 13/25: rigor 4, relevance 3, latency 4, robustness 2, edge 2. RAFT covers this role better."
+    },
+    {
+      "id": "sun_2018_pwcnet",
+      "reason": "PWC-Net is a 2018 optical flow method superseded by RAFT. While ~35 FPS on standard resolution is attractive, RAFT-S provides substantially better accuracy. Score 12/25: rigor 4, relevance 3, latency 4, robustness 2, edge 1."
+    },
+    {
+      "id": "wenzel_2021_vision_obstacle_drl",
+      "reason": "Deep RL obstacle avoidance is an alternative paradigm (end-to-end control), not directly applicable to the modular perception pipeline architecture chosen. Tested only in maze simulations and simple physical environments, not indoor wheelchair scenarios. Score 12/25: rigor 3, relevance 2, latency 2, robustness 3, edge 2."
+    },
+    {
+      "id": "erturk_2024_wheelchair_obstacle",
+      "reason": "Uses 2D/3D LiDAR sensors (CygLiDAR) for obstacle avoidance rather than vision-only sensors, making it outside the scope of this vision-only pipeline. The dynamic window approach methodology is relevant but sensor mismatch disqualifies it. Score 12/25: rigor 3, relevance 2, latency 3, robustness 3, edge 3."
+    },
+    {
+      "id": "gao_2021_ielas",
+      "reason": "FPGA-based stereo acceleration targets hardware not available in this project (Jetson uses GPU/DLA, not FPGA). The 38x speedup over CPU is irrelevant when the Orin Nano's GPU is the target compute fabric. Score 11/25: rigor 4, relevance 2, latency 4, robustness 2, edge 1."
+    }
+  ],
+  "metadata": {
+    "topic": "vision-only-perception-pipeline",
+    "evaluation_date": "2026-04-10",
+    "candidates_evaluated": 33,
+    "shortlisted": 17,
+    "excluded": 16,
+    "threshold": 14,
+    "actual_cutoff_used": 18,
+    "note": "All 17 shortlisted papers scored >= 18/25 or were flagged seminal. Threshold was not lowered — the pipeline has strong coverage at >= 18. Papers scoring 14-17 were excluded when a stronger paper covered the same pipeline component."
+  }
+}
