@@ -54,36 +54,43 @@ MERGED_DIR = DATASETS_DIR / "merged"
 
 
 # ---------------------------------------------------------------------------
-# Step 1.1 — Export Roboflow annotations
+# Step 1.1 — Download public overhead-person dataset from Roboflow Universe
 # ---------------------------------------------------------------------------
 
-def export_roboflow_dataset(
-    api_key: str,
-    workspace_name: str,
-    project_name: str,
-) -> Path:
-    """
-    Step 1.1 — Export the annotated coffee-shop dataset from Roboflow in
-    YOLOv8 format.
+# Public Roboflow Universe project — no project creation required.
+# MIT license. 5,602 overhead-view images annotated for person detection.
+# https://universe.roboflow.com/abhay-c-mkdjq/overhead-head-detection
+UNIVERSE_WORKSPACE = "abhay-c-mkdjq"
+UNIVERSE_PROJECT   = "overhead-head-detection"
+UNIVERSE_VERSION   = 1
 
-    Downloads images + labels to DATASETS_DIR/coffee_shop/.
+
+def download_universe_dataset(api_key: str) -> Path:
+    """
+    Step 1.1 — Download the public overhead-person dataset from Roboflow
+    Universe in YOLOv8 format. No project creation or annotation required —
+    this is a pre-annotated public dataset (MIT license).
+
+    Source: abhay-c-mkdjq/overhead-head-detection (5,602 images, YOLOv8)
+    URL:    https://universe.roboflow.com/abhay-c-mkdjq/overhead-head-detection
+
+    Downloads to DATASETS_DIR/overhead_universe/.
 
     Args:
-        api_key:         Roboflow API key.
-        workspace_name:  Roboflow workspace slug.
-        project_name:    Roboflow project slug (e.g. 'overhead-person-detection').
+        api_key: Any valid Roboflow API key (free tier is sufficient).
 
     Returns:
-        Path to the downloaded dataset directory (DATASETS_DIR/coffee_shop/).
+        Path to the downloaded dataset directory.
 
     Raises:
-        ValueError:   if `api_key` is empty.
-        RuntimeError: if the roboflow package is missing or the export fails.
+        ValueError:   if api_key is empty.
+        RuntimeError: if the roboflow package is missing or download fails.
     """
     if not api_key or not api_key.strip():
         raise ValueError(
             "[phase1] Roboflow API key is empty. "
-            "Pass --roboflow-key YOUR_KEY on the command line."
+            "Get a free key at https://app.roboflow.com → Settings → API Keys.\n"
+            "Pass it with:  --roboflow-key YOUR_KEY"
         )
 
     try:
@@ -94,37 +101,30 @@ def export_roboflow_dataset(
             "  Install it with:  pip install roboflow"
         ) from exc
 
-    print(f"[phase1/step1.1] Exporting '{project_name}' from Roboflow (YOLOv8 format)...")
+    dest = DATASETS_DIR / "overhead_universe"
+    if dest.exists() and any(dest.iterdir()):
+        print(f"[phase1/step1.1] Dataset already downloaded at {dest} — skipping.")
+        return dest
 
+    print(
+        f"[phase1/step1.1] Downloading public Universe dataset "
+        f"'{UNIVERSE_WORKSPACE}/{UNIVERSE_PROJECT}' (YOLOv8 format)..."
+    )
     try:
         rf = rf_module.Roboflow(api_key=api_key)
-        workspace = rf.workspace(workspace_name)
-        project = workspace.project(project_name)
-        # Export version 1; Roboflow creates it automatically if not present.
-        # SPEC_AMBIGUITY: spec says version(1) but the version number depends on
-        # how many times the user has generated an export in the UI. We try
-        # version 1 first, then fall back to the latest available version.
-        try:
-            version = project.version(1)
-        except Exception:
-            versions = project.versions()
-            if not versions:
-                raise RuntimeError(
-                    "[phase1] No dataset versions found in Roboflow project. "
-                    "Please generate a dataset version in the Roboflow UI first."
-                )
-            version = versions[-1]
-
-        dataset = version.download("yolov8", location=str(COFFEE_SHOP_DIR))
+        project = rf.workspace(UNIVERSE_WORKSPACE).project(UNIVERSE_PROJECT)
+        project.version(UNIVERSE_VERSION).download("yolov8", location=str(dest))
     except Exception as exc:
         raise RuntimeError(
-            f"[phase1] Roboflow export failed: {exc}\n"
-            f"  Make sure you have annotated frames and generated at least one "
-            f"dataset version in the Roboflow UI."
+            f"[phase1] Download from Roboflow Universe failed: {exc}\n"
+            f"\n"
+            f"  Check that your API key is valid (free key from app.roboflow.com).\n"
+            f"  The dataset is public — no project ownership needed.\n"
+            f"  Direct URL: https://universe.roboflow.com/{UNIVERSE_WORKSPACE}/{UNIVERSE_PROJECT}"
         ) from exc
 
-    print(f"[phase1/step1.1] Coffee-shop dataset downloaded to {COFFEE_SHOP_DIR}")
-    return COFFEE_SHOP_DIR
+    print(f"[phase1/step1.1] Universe dataset downloaded to {dest}")
+    return dest
 
 
 # ---------------------------------------------------------------------------
@@ -571,20 +571,20 @@ def write_dataset_summary(
 
 def run(
     roboflow_key: str,
-    roboflow_workspace: str,
-    roboflow_project: str,
     skip_oxford: bool = False,
     state: dict | None = None,
 ) -> dict:
     """
     Run all Phase 1 steps in order.
 
+    Downloads a pre-annotated public overhead-person dataset from Roboflow
+    Universe (no project creation or annotation required), optionally combines
+    it with Oxford Town Centre, and builds a merged train/val split.
+
     Args:
-        roboflow_key:       Roboflow API key.
-        roboflow_workspace: Roboflow workspace slug.
-        roboflow_project:   Roboflow project slug.
-        skip_oxford:        if True, skip Oxford Town Centre download (for testing).
-        state:              current plan state dict (used to check phase0 completion).
+        roboflow_key:  Any valid Roboflow API key (free tier sufficient).
+        skip_oxford:   if True, skip Oxford Town Centre download.
+        state:         current plan state dict (used to check phase0 completion).
 
     Returns:
         Dict of output paths for state recording.
@@ -595,9 +595,9 @@ def run(
     if state is not None:
         require_phase_done(0, state)
 
-    # Step 1.1
-    print("[phase1] Step 1.1 — Exporting Roboflow annotations...")
-    export_roboflow_dataset(roboflow_key, roboflow_workspace, roboflow_project)
+    # Step 1.1 — download public Universe dataset (no annotation needed)
+    print("[phase1] Step 1.1 — Downloading public overhead-person dataset from Roboflow Universe...")
+    universe_dir = download_universe_dataset(roboflow_key)
     print("[phase1] Step 1.1 — Done.")
 
     # Step 1.2
@@ -615,7 +615,7 @@ def run(
 
     # Step 1.3
     print("[phase1] Step 1.3 — Merging datasets...")
-    merged_dir = merge_datasets(COFFEE_SHOP_DIR, oxford_dir)
+    merged_dir = merge_datasets(universe_dir, oxford_dir)
     print("[phase1] Step 1.3 — Done.")
 
     # Step 1.4
@@ -624,7 +624,7 @@ def run(
     print("[phase1] Step 1.4 — Done.")
 
     # Summary report
-    summary_path = write_dataset_summary(COFFEE_SHOP_DIR, oxford_dir, merged_dir)
+    summary_path = write_dataset_summary(universe_dir, oxford_dir, merged_dir)
 
     print_next_step(
         """
@@ -642,7 +642,7 @@ def run(
     )
 
     return {
-        "coffee_shop_dir": str(COFFEE_SHOP_DIR),
+        "universe_dir": str(universe_dir),
         "oxford_dir": str(oxford_dir),
         "merged_dir": str(merged_dir),
         "data_yaml": str(merged_dir / "data.yaml"),

@@ -3,7 +3,7 @@ run_plan.py — Coffee-Shop Demo: Phased Research Automation Runner.
 
 Usage:
     python run_plan.py phase0 --video PATH --roboflow-key KEY [--roboflow-workspace WS] [--sample-every N] [--device auto|cpu|mps]
-    python run_plan.py phase1 --roboflow-key KEY --roboflow-project NAME --roboflow-workspace NAME [--skip-oxford]
+    python run_plan.py phase1 --roboflow-key KEY [--skip-oxford]
     python run_plan.py phase2 [--epochs 50] [--imgsz 640] [--device mps|cpu]
     python run_plan.py phase3 --video PATH [--device cpu|mps] [--with-gt]
     python run_plan.py status
@@ -79,7 +79,7 @@ def cmd_status(args: argparse.Namespace) -> None:
         print(f"  Next: run phase{next_phase}")
         _hints = {
             0: "python run_plan.py phase0 --video YOUR_VIDEO.mp4 --roboflow-key YOUR_KEY",
-            1: "python run_plan.py phase1 --roboflow-key KEY --roboflow-project overhead-person-detection --roboflow-workspace YOUR_WS",
+            1: "python run_plan.py phase1 --roboflow-key YOUR_KEY",
             2: "python run_plan.py phase2 --epochs 50 --imgsz 640",
             3: "python run_plan.py phase3 --video YOUR_VIDEO.mp4",
         }
@@ -125,8 +125,6 @@ def cmd_phase1(args: argparse.Namespace) -> None:
 
     outputs = phase1_dataset.run(
         roboflow_key=args.roboflow_key,
-        roboflow_workspace=args.roboflow_workspace,
-        roboflow_project=args.roboflow_project,
         skip_oxford=args.skip_oxford,
         state=state,
     )
@@ -218,18 +216,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # ---- phase1 ----
-    p1 = sub.add_parser("phase1", help="Export Roboflow + Oxford Town Centre + merge.")
+    p1 = sub.add_parser(
+        "phase1",
+        help="Download public overhead-person dataset from Roboflow Universe + Oxford Town Centre + merge.",
+    )
     p1.add_argument(
         "--roboflow-key", required=True,
-        help="Roboflow API key.",
-    )
-    p1.add_argument(
-        "--roboflow-project", required=True,
-        help="Roboflow project slug (e.g. 'overhead-person-detection').",
-    )
-    p1.add_argument(
-        "--roboflow-workspace", required=True,
-        help="Roboflow workspace slug.",
+        help="Any valid Roboflow API key (free tier). Get one at app.roboflow.com → Settings → API Keys.",
     )
     p1.add_argument(
         "--skip-oxford", action="store_true",
