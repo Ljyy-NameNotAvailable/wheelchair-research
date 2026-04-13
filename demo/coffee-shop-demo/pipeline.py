@@ -22,6 +22,7 @@ fine-tune on an overhead pedestrian dataset (e.g. VIRAT or Oxford Town Centre).
 
 from __future__ import annotations
 
+import math
 import warnings
 from dataclasses import dataclass
 from typing import Any
@@ -32,6 +33,14 @@ import torch
 import torchvision.transforms.functional as TF
 from torchvision.models.optical_flow import raft_small, Raft_Small_Weights
 from ultralytics import YOLO
+
+# ---------------------------------------------------------------------------
+# COCO classes used
+# Dynamic:  0=person
+# Context (occupancy signals): 39=bottle, 41=cup, 45=bowl, 63=laptop,
+#                               24=backpack, 26=handbag, 67=cell phone, 73=book
+# Context (spatial/furniture): 56=chair, 57=couch, 60=dining table
+# ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
 # Default configuration
@@ -46,6 +55,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "flow_opacity": 0.3,            # heatmap overlay opacity
     "device": "auto",               # "auto" → cuda if available, else cpu
     "overhead_camera": True,        # informational; future: adjust detection params
+    "dynamic_classes": [0],         # person — full tracking: velocity, TTC, SLAM mask
+    "context_classes": [39, 41, 45, 56, 57, 60, 63, 24, 26, 67, 73],
+    # bottle, cup, bowl, chair, couch, dining table, laptop, backpack, handbag, phone, book
+    "context_proximity_px": 120,    # max pixel distance for occupancy inference
+    "occupancy_min_frames": 5,      # context object must be tracked for N frames to count as occupancy signal
 }
 
 # YOLO class IDs used by this demo (COCO dataset numbering)
@@ -55,6 +69,11 @@ _TRACK_CLASSES = [0]       # person — tracked with ByteTrack
 # here for completeness but do not run a separate anchor pass — persons are
 # the only tracked class and the only class in scene_state.
 _ANCHOR_CLASSES = [56, 41]  # chair, cup — reserved for future use
+
+# Class IDs that represent furniture (spatial layout, not occupancy signals)
+_FURNITURE_CLASS_IDS = {56, 57, 60}         # chair, couch, dining table
+# Class IDs that are occupancy signals (imply a person was/will be present)
+_OCCUPANCY_SIGNAL_CLASS_IDS = {39, 41, 45, 63, 24, 26, 67, 73}  # bottle, cup, bowl, laptop, backpack, handbag, phone, book
 
 
 # ---------------------------------------------------------------------------
@@ -72,6 +91,20 @@ class TrackedObject:
 
 
 @dataclass
+class ContextObject:
+    """A context (non-person) object tracked across frames."""
+    track_id: int
+    class_name: str
+    class_id: int
+    bbox_px: list[int]       # [x1, y1, x2, y2]
+    centroid_px: list[int]   # [cx, cy]
+    confidence: float
+    frames_tracked: int      # how many consecutive frames this track has been seen
+    is_furniture: bool       # True for chair, couch, dining table
+    is_occupancy_signal: bool  # True for cup, bottle, bowl, laptop, backpack, handbag, phone, book
+
+
+@dataclass
 class UnclassifiedRegion:
     """A connected-component region with optical flow but no YOLO match."""
     bbox_px: list[int]          # [x1, y1, x2, y2]
@@ -86,6 +119,7 @@ class FrameResult:
     annotated_frame: np.ndarray     # BGR uint8, same resolution as input
     scene_state: dict[str, Any]    # JSON-serialisable scene description
     dynamic_mask: np.ndarray       # uint8, HxW, values 0 or 255
+    context_objects: list[ContextObject]  # context objects detected this frame
 
 
 # ---------------------------------------------------------------------------
@@ -122,6 +156,147 @@ def _linear_extrapolate(
     return [(cx + dx * (i + 1), cy + dy * (i + 1)) for i in range(steps)]
 
 
+def _centroid_distance(a: list[int], b: list[int]) -> float:
+    """Euclidean pixel distance between two [cx, cy] centroids."""
+    return math.hypot(a[0] - b[0], a[1] - b[1])
+
+
+# ---------------------------------------------------------------------------
+# Semantic inference engine
+# ---------------------------------------------------------------------------
+
+class SemanticInferenceEngine:
+    """
+    Pure inference engine — derives occupancy and navigation hints from
+    tracked context objects and tracked persons.
+
+    All state lives in DynamicPerceptionPipeline; this class is stateless.
+    infer() is a pure function of its inputs.
+    """
+
+    def __init__(self, proximity_px: int, min_frames: int) -> None:
+        """
+        Args:
+            proximity_px: maximum pixel distance for occupancy / pairing decisions.
+            min_frames:   minimum frames_tracked before a context object counts
+                          as a stable occupancy signal.
+        """
+        self._proximity_px = proximity_px
+        self._min_frames = min_frames
+
+    def infer(
+        self,
+        context_objects: list[ContextObject],
+        tracked_persons: list[TrackedObject],
+        frame_shape: tuple[int, int],   # (H, W)
+    ) -> dict[str, Any]:
+        """
+        Derive scene semantics from context objects and tracked persons.
+
+        Returns the semantic_context dict for the scene state.
+
+        Rules applied:
+          Rule 1 — Occupied table: a dining table is occupied if any
+            stable occupancy-signal object is within proximity_px of it.
+          Rule 2 — Inferred occupancy regions: stable occupancy-signal
+            objects not near any detected person create inferred regions.
+          Rule 3 — Empty chairs: chair/couch with no nearby person and no
+            nearby occupancy-signal object.
+          Rule 4 — Furniture map: all dining tables and chairs/couches
+            with their layout and occupancy status.
+        """
+        prox = self._proximity_px
+        min_f = self._min_frames
+
+        # Split context objects by category for easy lookup
+        tables = [c for c in context_objects if c.class_id == 60]
+        chairs_couches = [c for c in context_objects if c.class_id in (56, 57)]
+        occ_signals = [c for c in context_objects if c.is_occupancy_signal]
+
+        person_centroids = [list(p.centroid_px) for p in tracked_persons]
+
+        # ------------------------------------------------------------------
+        # Rule 1 — Occupied tables
+        # ------------------------------------------------------------------
+        occupied_table_ids: set[int] = set()
+        for table in tables:
+            for sig in occ_signals:
+                if sig.frames_tracked >= min_f:
+                    if _centroid_distance(table.centroid_px, sig.centroid_px) <= prox:
+                        occupied_table_ids.add(table.track_id)
+                        break
+
+        # ------------------------------------------------------------------
+        # Rule 2 — Inferred occupancy regions
+        # ------------------------------------------------------------------
+        inferred_occupancy_regions: list[dict[str, Any]] = []
+        for sig in occ_signals:
+            if sig.frames_tracked < min_f:
+                continue
+            # Check if any person is nearby
+            person_nearby = any(
+                _centroid_distance(sig.centroid_px, pc) <= prox
+                for pc in person_centroids
+            )
+            inferred_occupancy_regions.append(
+                {
+                    "centroid_px": sig.centroid_px,
+                    "bbox_px": sig.bbox_px,
+                    "signal_class": sig.class_name,
+                    "frames_stable": sig.frames_tracked,
+                    "confidence": round(sig.confidence, 4),
+                    "person_nearby": person_nearby,
+                }
+            )
+
+        # ------------------------------------------------------------------
+        # Rule 3 — Empty chairs
+        # ------------------------------------------------------------------
+        empty_chairs: list[ContextObject] = []
+        for seat in chairs_couches:
+            near_person = any(
+                _centroid_distance(seat.centroid_px, pc) <= prox
+                for pc in person_centroids
+            )
+            near_signal = any(
+                _centroid_distance(seat.centroid_px, sig.centroid_px) <= prox
+                for sig in occ_signals
+            )
+            if not near_person and not near_signal:
+                empty_chairs.append(seat)
+
+        # ------------------------------------------------------------------
+        # Rule 4 — Furniture map
+        # ------------------------------------------------------------------
+        furniture: list[dict[str, Any]] = []
+        for table in tables:
+            furniture.append(
+                {
+                    "class": table.class_name,
+                    "track_id": table.track_id,
+                    "bbox_px": table.bbox_px,
+                    "occupied": table.track_id in occupied_table_ids,
+                }
+            )
+        for seat in chairs_couches:
+            furniture.append(
+                {
+                    "class": seat.class_name,
+                    "track_id": seat.track_id,
+                    "bbox_px": seat.bbox_px,
+                    "likely_empty": seat in empty_chairs,
+                }
+            )
+
+        return {
+            "occupied_tables": len(occupied_table_ids),
+            "empty_chairs": len(empty_chairs),
+            "inferred_occupancy_regions": inferred_occupancy_regions,
+            "furniture": furniture,
+            "context_object_count": len(context_objects),
+        }
+
+
 # ---------------------------------------------------------------------------
 # Main pipeline class
 # ---------------------------------------------------------------------------
@@ -149,19 +324,33 @@ class DynamicPerceptionPipeline:
 
         print(f"[pipeline] Using device: {self.device}")
 
+        # Resolve class lists from config
+        self._dynamic_classes: list[int] = list(cfg["dynamic_classes"])
+        self._context_classes: list[int] = list(cfg["context_classes"])
+
         # Load YOLOv8n with ByteTrack
         self.yolo = YOLO(cfg["yolo_model"])
 
         # Load RAFT-Small optical flow model (with OOM fallback)
         self._raft = self._load_raft()
 
-        # Per-frame state
+        # Semantic inference engine (stateless; state stored in pipeline)
+        self._semantic_engine = SemanticInferenceEngine(
+            proximity_px=int(cfg["context_proximity_px"]),
+            min_frames=int(cfg["occupancy_min_frames"]),
+        )
+
+        # Per-frame state — dynamic (person) tracking
         self._prev_frame: np.ndarray | None = None       # previous BGR frame for RAFT
         self._flow_mask: np.ndarray | None = None        # carried-forward binary mask
         self._flow_magnitude: np.ndarray | None = None   # carried-forward float magnitude
         self._prev_centroids: dict[int, tuple[int, int]] = {}  # track_id → centroid
         self._prev_areas: dict[int, float] = {}           # track_id → bbox area (px^2)
         self._track_history: dict[int, list[tuple[int, int]]] = {}  # track_id → centroids
+
+        # Per-frame state — context object tracking
+        # Maps track_id → frames_tracked count (consecutive)
+        self._context_track_history: dict[int, int] = {}
 
     # ------------------------------------------------------------------
     # RAFT loader
@@ -368,6 +557,8 @@ class DynamicPerceptionPipeline:
         flow_magnitude: np.ndarray | None,
         frame_idx: int,
         fps: float,
+        context_objects: list[ContextObject],
+        semantic_context: dict[str, Any],
     ) -> np.ndarray:
         """
         Render all annotations onto a copy of `frame` and return it.
@@ -378,11 +569,16 @@ class DynamicPerceptionPipeline:
           - Yellow dashed rects for unclassified motion regions
           - Red dashed rects for unclassified regions above theta_stop
           - Frame counter + FPS in top-left corner
+          - Light grey dashed bboxes for furniture (chair, couch, dining table)
+          - Blue solid bboxes for stable occupancy signals (cup, laptop, etc.)
+          - Semi-transparent blue circles for inferred occupancy regions
+          - Green dots at centroids of empty chairs
+          - Orange bbox overlays on occupied tables
         """
         out = frame.copy()
         theta = float(self.cfg["theta"])
-        theta_stop = float(self.cfg["theta_stop"])
         opacity = float(self.cfg["flow_opacity"])
+        min_frames = int(self.cfg["occupancy_min_frames"])
 
         # -- Flow heatmap overlay --
         if flow_magnitude is not None:
@@ -398,7 +594,97 @@ class DynamicPerceptionPipeline:
             ).astype(np.uint8)
             out = np.where(mask3, blended, out)
 
-        # -- Tracked persons --
+        # -- Context objects --
+        # Build lookup sets for fast checks
+        occupied_table_ids: set[int] = set()
+        for entry in semantic_context.get("furniture", []):
+            if entry.get("class") == "dining table" and entry.get("occupied"):
+                occupied_table_ids.add(entry["track_id"])
+
+        empty_chair_ids: set[int] = set()
+        for entry in semantic_context.get("furniture", []):
+            if entry.get("class") in ("chair", "couch") and entry.get("likely_empty"):
+                empty_chair_ids.add(entry["track_id"])
+
+        GREY = (160, 160, 160)
+        BLUE = (200, 100, 0)       # BGR — renders as orange-blue; use (200,100,0) for orange overlay
+        ORANGE = (0, 140, 255)     # BGR orange
+        SOLID_BLUE = (200, 80, 0)  # BGR — a warm blue approximation; use true blue below
+        TRUE_BLUE = (200, 50, 0)   # keeping colours simple
+        # Use straightforward BGR values
+        COLOR_FURNITURE_GREY = (180, 180, 180)
+        COLOR_OCC_SIGNAL_BLUE = (200, 80, 0)   # blue in BGR = (B, G, R) → (200, 80, 0) is orange-ish
+        # Correct BGR: blue = (255, 0, 0), orange = (0, 165, 255), green = (0, 200, 0)
+        COLOR_FURNITURE = (180, 180, 180)    # light grey
+        COLOR_SIGNAL = (255, 80, 0)          # blue (BGR)
+        COLOR_OCCUPIED_TABLE = (0, 165, 255) # orange (BGR)
+        COLOR_EMPTY_CHAIR_DOT = (0, 200, 0)  # green
+
+        for ctx in context_objects:
+            x1, y1, x2, y2 = ctx.bbox_px
+            cx, cy = ctx.centroid_px
+
+            if ctx.is_furniture:
+                if ctx.class_id == 60:  # dining table
+                    if ctx.track_id in occupied_table_ids:
+                        # Orange bbox overlay on occupied table
+                        cv2.rectangle(out, (x1, y1), (x2, y2), COLOR_OCCUPIED_TABLE, 3)
+                        cv2.putText(
+                            out, f"occupied table #{ctx.track_id}",
+                            (x1, max(y1 - 6, 14)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.45, COLOR_OCCUPIED_TABLE, 1,
+                        )
+                    else:
+                        # Light grey dashed bbox, small class label
+                        self._draw_dashed_rect(out, (x1, y1), (x2, y2), COLOR_FURNITURE, 1, 8)
+                        cv2.putText(
+                            out, ctx.class_name,
+                            (x1, max(y1 - 4, 12)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, COLOR_FURNITURE, 1,
+                        )
+                else:  # chair / couch
+                    self._draw_dashed_rect(out, (x1, y1), (x2, y2), COLOR_FURNITURE, 1, 8)
+                    cv2.putText(
+                        out, ctx.class_name,
+                        (x1, max(y1 - 4, 12)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.4, COLOR_FURNITURE, 1,
+                    )
+                    if ctx.track_id in empty_chair_ids:
+                        # Small green dot at centroid for empty chairs
+                        cv2.circle(out, (cx, cy), 5, COLOR_EMPTY_CHAIR_DOT, -1)
+
+            elif ctx.is_occupancy_signal:
+                if ctx.frames_tracked >= min_frames:
+                    # Blue solid bbox, class label + frames_tracked count
+                    cv2.rectangle(out, (x1, y1), (x2, y2), COLOR_SIGNAL, 2)
+                    label = f"{ctx.class_name} f={ctx.frames_tracked}"
+                    cv2.putText(
+                        out, label,
+                        (x1, max(y1 - 6, 14)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, COLOR_SIGNAL, 1,
+                    )
+                else:
+                    # Unstable signal — draw dimly
+                    self._draw_dashed_rect(out, (x1, y1), (x2, y2), COLOR_FURNITURE, 1, 6)
+
+        # -- Inferred occupancy regions (semi-transparent blue circles) --
+        overlay = out.copy()
+        for region in semantic_context.get("inferred_occupancy_regions", []):
+            if region.get("person_nearby"):
+                continue  # only draw where no person is nearby
+            cx, cy = region["centroid_px"]
+            radius = 30
+            cv2.circle(overlay, (cx, cy), radius, COLOR_SIGNAL, -1)
+            label = f"inferred: {region['signal_class']}"
+            cv2.putText(
+                overlay, label,
+                (cx - radius, cy - radius - 4),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.4, COLOR_SIGNAL, 1,
+            )
+        # Blend with alpha for semi-transparency
+        cv2.addWeighted(overlay, 0.35, out, 0.65, 0, out)
+
+        # -- Tracked persons (unchanged) --
         GREEN = (0, 200, 0)
         for obj in objects:
             x1, y1, x2, y2 = obj.bbox_px
@@ -525,7 +811,8 @@ class DynamicPerceptionPipeline:
                         Falls back to `fps` if not provided.
 
         Returns:
-            FrameResult containing annotated_frame, scene_state, dynamic_mask.
+            FrameResult containing annotated_frame, scene_state, dynamic_mask,
+            and context_objects.
 
         Raises:
             RuntimeError: if YOLO or RAFT raise an unrecoverable error.
@@ -543,18 +830,24 @@ class DynamicPerceptionPipeline:
         timestamp_s = round(frame_idx / _fps_for_ts, 3) if _fps_for_ts > 0 else 0.0
 
         # ---- Step 1: YOLO detection + ByteTrack tracking ----------------
+        # Run a single track() call over ALL classes (dynamic + context)
+        all_classes = self._dynamic_classes + self._context_classes
         try:
             results = self.yolo.track(
                 frame,
                 persist=True,
-                classes=_TRACK_CLASSES,
+                classes=all_classes,
                 verbose=False,
             )
         except Exception as exc:
             raise RuntimeError(f"[pipeline] YOLO tracking failed: {exc}") from exc
 
         tracked_objects: list[TrackedObject] = []
+        context_objects: list[ContextObject] = []
         velocities: dict[int, dict[str, float]] = {}
+
+        # Track IDs seen this frame — used to update context_track_history
+        seen_context_ids: set[int] = set()
 
         if results and results[0].boxes is not None:
             for box in results[0].boxes:
@@ -569,26 +862,57 @@ class DynamicPerceptionPipeline:
                 cy = (y1 + y2) // 2
                 centroid: tuple[int, int] = (cx, cy)
 
-                obj = TrackedObject(
-                    track_id=track_id,
-                    class_name=cls_name,
-                    bbox_px=[x1, y1, x2, y2],
-                    centroid_px=[cx, cy],
-                    confidence=conf,
-                )
-                tracked_objects.append(obj)
+                if cls_id in self._dynamic_classes:
+                    # --- Dynamic (person) tracking path ---
+                    obj = TrackedObject(
+                        track_id=track_id,
+                        class_name=cls_name,
+                        bbox_px=[x1, y1, x2, y2],
+                        centroid_px=[cx, cy],
+                        confidence=conf,
+                    )
+                    tracked_objects.append(obj)
 
-                # Velocity (finite difference from previous centroid)
-                vel = self._estimate_velocity(track_id, centroid)
-                velocities[track_id] = vel
+                    # Velocity (finite difference from previous centroid)
+                    vel = self._estimate_velocity(track_id, centroid)
+                    velocities[track_id] = vel
 
-                # Maintain centroid history for trajectory prediction stub
-                hist = self._track_history.setdefault(track_id, [])
-                hist.append(centroid)
-                if len(hist) > 30:
-                    hist.pop(0)
-                # Called per spec — result intentionally unused here
-                self.predict_trajectory(hist)
+                    # Maintain centroid history for trajectory prediction stub
+                    hist = self._track_history.setdefault(track_id, [])
+                    hist.append(centroid)
+                    if len(hist) > 30:
+                        hist.pop(0)
+                    # Called per spec — result intentionally unused here
+                    self.predict_trajectory(hist)
+
+                elif cls_id in self._context_classes:
+                    # --- Context object tracking path ---
+                    # Update frames_tracked counter
+                    prev_count = self._context_track_history.get(track_id, 0)
+                    new_count = prev_count + 1
+                    self._context_track_history[track_id] = new_count
+                    seen_context_ids.add(track_id)
+
+                    is_furniture = cls_id in _FURNITURE_CLASS_IDS
+                    is_occ_signal = cls_id in _OCCUPANCY_SIGNAL_CLASS_IDS
+
+                    ctx_obj = ContextObject(
+                        track_id=track_id,
+                        class_name=cls_name,
+                        class_id=cls_id,
+                        bbox_px=[x1, y1, x2, y2],
+                        centroid_px=[cx, cy],
+                        confidence=conf,
+                        frames_tracked=new_count,
+                        is_furniture=is_furniture,
+                        is_occupancy_signal=is_occ_signal,
+                    )
+                    context_objects.append(ctx_obj)
+
+        # Reset frames_tracked for any context track IDs that disappeared this frame
+        disappeared_ids = set(self._context_track_history.keys()) - seen_context_ids
+        for tid in disappeared_ids:
+            del self._context_track_history[tid]
 
         # ---- Step 2: Optical flow (every flow_interval frames) ----------
         flow_computed_this_frame = False
@@ -613,7 +937,7 @@ class DynamicPerceptionPipeline:
         current_flow_mask = self._flow_mask
         current_flow_mag = self._flow_magnitude
 
-        # ---- Step 3: Detection mask -------------------------------------
+        # ---- Step 3: Detection mask (persons only — context objects NOT included) ----
         det_mask = self._detection_mask((h, w), tracked_objects)
 
         # ---- Step 4: Dynamic mask = detection | flow --------------------
@@ -632,6 +956,13 @@ class DynamicPerceptionPipeline:
             unclassified = self._unclassified_regions(
                 current_flow_mask, det_mask, current_flow_mag, flow_fast_mask
             )
+
+        # ---- Step 5b: Semantic inference --------------------------------
+        semantic_context = self._semantic_engine.infer(
+            context_objects=context_objects,
+            tracked_persons=tracked_objects,
+            frame_shape=(h, w),
+        )
 
         # ---- Step 6: Build scene_state ----------------------------------
         objects_out: list[dict[str, Any]] = []
@@ -678,6 +1009,21 @@ class DynamicPerceptionPipeline:
             if nearest_px is None or d < nearest_px:
                 nearest_px = d
 
+        # Serialise context objects for scene_state
+        context_objects_out: list[dict[str, Any]] = [
+            {
+                "id": c.track_id,
+                "class": c.class_name,
+                "bbox_px": c.bbox_px,
+                "centroid_px": c.centroid_px,
+                "confidence": round(c.confidence, 4),
+                "frames_tracked": c.frames_tracked,
+                "is_occupancy_signal": c.is_occupancy_signal,
+                "is_furniture": c.is_furniture,
+            }
+            for c in context_objects
+        ]
+
         scene_state: dict[str, Any] = {
             "frame_idx": frame_idx,
             "timestamp_s": timestamp_s,
@@ -696,6 +1042,8 @@ class DynamicPerceptionPipeline:
             "nearest_person_px": (
                 round(nearest_px, 2) if nearest_px is not None else None
             ),
+            "context_objects": context_objects_out,
+            "semantic_context": semantic_context,
         }
 
         # ---- Step 7: Visualization --------------------------------------
@@ -707,6 +1055,8 @@ class DynamicPerceptionPipeline:
             current_flow_mag,
             frame_idx,
             fps,
+            context_objects=context_objects,
+            semantic_context=semantic_context,
         )
 
         # ---- Update per-frame state for next call -----------------------
@@ -716,4 +1066,5 @@ class DynamicPerceptionPipeline:
             annotated_frame=annotated,
             scene_state=scene_state,
             dynamic_mask=dynamic_mask,
+            context_objects=context_objects,
         )
