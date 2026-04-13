@@ -1,0 +1,9 @@
+# Requirements for run_plan.py and the phases/ package.
+# These extend the base requirements.txt (which covers pipeline.py / run_video.py).
+#
+# Install both:
+#   pip install -r requirements.txt
+#   pip install -r requirements_run_plan.txt
+
+roboflow>=1.1.0
+pyyaml>=6.0
