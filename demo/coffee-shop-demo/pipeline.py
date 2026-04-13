@@ -39,7 +39,7 @@ from ultralytics import YOLO
 # Dynamic:  0=person
 # Context (occupancy signals): 39=bottle, 41=cup, 45=bowl, 63=laptop,
 #                               24=backpack, 26=handbag, 67=cell phone, 73=book
-# Context (spatial/furniture): 56=chair, 57=couch, 60=dining table
+# Context (spatial/furniture): 56=chair, 57=couch, 58=potted plant, 60=dining table
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
@@ -56,7 +56,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "device": "auto",               # "auto" → cuda if available, else cpu
     "overhead_camera": True,        # informational; future: adjust detection params
     "dynamic_classes": [0],         # person — full tracking: velocity, TTC, SLAM mask
-    "context_classes": [39, 41, 45, 56, 57, 60, 63, 24, 26, 67, 73],
+    "context_classes": [39, 41, 45, 56, 57, 58, 60, 63, 24, 26, 67, 73],
     # bottle, cup, bowl, chair, couch, dining table, laptop, backpack, handbag, phone, book
     "context_proximity_px": 120,    # max pixel distance for occupancy inference
     "occupancy_min_frames": 5,      # context object must be tracked for N frames to count as occupancy signal
@@ -71,7 +71,7 @@ _TRACK_CLASSES = [0]       # person — tracked with ByteTrack
 _ANCHOR_CLASSES = [56, 41]  # chair, cup — reserved for future use
 
 # Class IDs that represent furniture (spatial layout, not occupancy signals)
-_FURNITURE_CLASS_IDS = {56, 57, 60}         # chair, couch, dining table
+_FURNITURE_CLASS_IDS = {56, 57, 58, 60}     # chair, couch, potted plant, dining table
 # Class IDs that are occupancy signals (imply a person was/will be present)
 _OCCUPANCY_SIGNAL_CLASS_IDS = {39, 41, 45, 63, 24, 26, 67, 73}  # bottle, cup, bowl, laptop, backpack, handbag, phone, book
 
