@@ -1,0 +1,99 @@
+# config.yaml — Default parameters for the dynamic-vision-perception pipeline.
+#
+# All parameters from dynamic-components-design.md are represented here.
+# Edit this file to tune the pipeline; no code changes are needed for
+# parameter adjustments.
+#
+# Spec ref: dynamic-components-design.md
+
+# ---------------------------------------------------------------------------
+# Hardware / device
+# ---------------------------------------------------------------------------
+device: "cuda"            # "cuda" or "cpu". Auto-falls-back to CPU if no GPU.
+
+# ---------------------------------------------------------------------------
+# Camera / frame
+# ---------------------------------------------------------------------------
+frame_height: 480         # RealSense D435i default
+frame_width:  640         # RealSense D435i default
+
+camera_intrinsics:
+  fx: 614.0               # Focal length x (pixels) — RealSense D435i approximate
+  fy: 614.0               # Focal length y (pixels)
+  cx: 320.0               # Principal point x (pixels, = width / 2)
+  cy: 240.0               # Principal point y (pixels, = height / 2)
+
+# ---------------------------------------------------------------------------
+# YOLO + ByteTrack
+# ---------------------------------------------------------------------------
+yolo_model_path: "yolov8n.pt"   # Path to .pt or TensorRT .engine file.
+                                 # Download: yolo export model=yolov8n.pt format=engine
+yolo_conf_threshold: 0.25       # Minimum detection confidence
+yolo_iou_threshold:  0.45       # NMS IoU threshold
+
+# Dynamic classes — any YOLO detection in these classes contributes to the
+# detection mask. Must match the class names in the model's vocabulary.
+dynamic_classes:
+  - person
+  - wheelchair
+  - generic_obstacle
+
+# ---------------------------------------------------------------------------
+# Optical flow (RAFT-S)
+# Spec ref: Section 2b, Section 6 (compute scheduling)
+# ---------------------------------------------------------------------------
+raft_weights_path: null          # null = use torchvision pretrained weights.
+                                 # Set to a .pth path for custom weights.
+raft_iters: 12                   # Recurrent refinement iterations.
+                                 # Lower = faster, less accurate. Range: 6–32.
+
+# Flow magnitude thresholds (spec Section 2 — empirically tuned values given)
+flow_threshold_px:  2.0          # θ: pixels/frame above which pixel = dynamic.
+                                 # Spec: "θ ≈ 2.0 px/frame empirically."
+stop_threshold_px:  8.0          # θ_stop: triggers immediate deceleration.
+                                 # Spec: "θ_stop = 8.0 px/frame."
+
+# Unclassified motion region filtering
+min_unclassified_area_px2: 500   # Discard connected components smaller than
+                                 # this area (noise rejection).
+
+# ---------------------------------------------------------------------------
+# SLAM interface
+# Spec ref: Section 3a — ORB-SLAM3 mask integration
+# ---------------------------------------------------------------------------
+slam_mock_mode: true             # true  = no real ORB-SLAM3; returns mock pose.
+                                 # false = requires ORB-SLAM3 Python bindings.
+
+# ORB-SLAM3 vocabulary and config paths (used only when slam_mock_mode = false)
+orb_slam3_vocab_path:   "/opt/ORB_SLAM3/Vocabulary/ORBvoc.txt"
+orb_slam3_config_path:  "/opt/ORB_SLAM3/Examples/RGB-D/RealSense_D435i.yaml"
+
+# ---------------------------------------------------------------------------
+# Scene state publisher
+# Spec ref: Section 5 — extended schema
+# ---------------------------------------------------------------------------
+scene_state_topic:    "/wheelchair/scene_state"    # std_msgs/String (JSON)
+dynamic_mask_topic:   "/wheelchair/dynamic_mask"   # sensor_msgs/Image (mono8)
+decel_alert_topic:    "/wheelchair/decel_alert"    # std_msgs/String (JSON)
+
+# Track history length for trajectory prediction.
+# At 10 FPS SLAM cadence: 30 entries = 3 seconds.
+# Spec ref: Section 9 — trajectory prediction uses per-track position history.
+track_history_max_len: 30
+
+# Collision radii for time-to-collision computation
+wheelchair_radius_m: 0.4         # Bounding radius of the wheelchair (metres)
+object_radius_m:     0.3         # Default bounding radius of tracked objects
+
+# ---------------------------------------------------------------------------
+# Trajectory prediction stub
+# Spec ref: Section 9 — Kalman linear extrapolation; Social LSTM upgrade path
+# ---------------------------------------------------------------------------
+trajectory_horizon_s: 3.0        # Prediction horizon in seconds
+trajectory_step_s:    0.5        # Waypoint interval in seconds
+
+# When social_lstm_enabled = true, the node will attempt to call
+# social_lstm_client.predict() instead of linear extrapolation.
+# REQUIRES: the social_lstm_node ROS2 node to be running separately.
+# See trajectory_stub.py for the Social LSTM plug-in point.
+social_lstm_enabled: false

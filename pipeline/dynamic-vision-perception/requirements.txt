@@ -1,0 +1,30 @@
+# requirements.txt — Python dependencies for dynamic-vision-perception
+#
+# Install with:
+#   pip install -r requirements.txt
+#
+# For Jetson Orin Nano (JetPack 6.x):
+#   torch and torchvision must be installed via the Jetson PyPI index:
+#     pip install torch torchvision --index-url https://developer.download.nvidia.com/compute/redist/jp/v60
+#   Then install the rest normally.
+
+# Core ML
+torch>=2.1.0
+torchvision>=0.16.0          # provides torchvision.models.optical_flow.raft_small
+
+# Computer vision
+opencv-python>=4.8.0         # cv2, connectedComponentsWithStats
+numpy>=1.24.0
+
+# YOLO + ByteTrack
+ultralytics>=8.0.0            # provides model.track() with ByteTrack
+
+# Configuration
+PyYAML>=6.0
+
+# ROS2 Python bindings — installed by ROS2 Humble, not via pip:
+#   rclpy
+#   sensor_msgs
+#   std_msgs
+#   geometry_msgs
+#   cv_bridge
