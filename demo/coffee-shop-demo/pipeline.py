@@ -484,13 +484,21 @@ class DynamicPerceptionPipeline:
         state output."
 
         Args:
-            track_history: list of (cx, cy) centroids, oldest-first.
+            track_history: list of (cx, cy) tuples OR dicts with a
+                ``centroid_px`` key, oldest-first.
             steps: number of future frames to predict.
 
         Returns:
             List of predicted (cx, cy) positions.
         """
-        return _linear_extrapolate(track_history, steps)
+        normalized: list[tuple[int, int]] = []
+        for entry in track_history:
+            if isinstance(entry, dict):
+                cx, cy = entry["centroid_px"]
+                normalized.append((int(cx), int(cy)))
+            else:
+                normalized.append((int(entry[0]), int(entry[1])))
+        return _linear_extrapolate(normalized, steps)
 
     # ------------------------------------------------------------------
     # Core entry point
@@ -656,7 +664,7 @@ class DynamicPerceptionPipeline:
             )
 
             # Update per-track state for next frame
-            self._prev_centroids[obj.track_id] = centroid  # type: ignore[assignment]
+            self._prev_centroids[obj.track_id] = tuple(obj.centroid_px)
             self._prev_areas[obj.track_id] = area
 
         dynamic_px_count = int(np.count_nonzero(dynamic_mask))
