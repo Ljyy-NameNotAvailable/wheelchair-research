@@ -306,21 +306,28 @@ def upload_to_roboflow(
     print(f"[phase0/step0.4] Connecting to project '{project_name}'...")
     try:
         project = workspace.project(project_name)
+        print(f"[phase0/step0.4] Connected to existing project '{project_name}'.")
     except Exception:
-        # Project does not exist — create it
-        print(f"[phase0/step0.4] Project not found; creating '{project_name}'...")
-        try:
-            project = workspace.create_project(
-                project_name=project_name,
-                project_type="object-detection",
-                annotation="overhead-person-detection",
-                project_license="MIT",
-            )
-        except Exception as exc:
-            raise RuntimeError(
-                f"[phase0] Could not create Roboflow project '{project_name}'.\n"
-                f"  Original error: {exc}"
-            ) from exc
+        # Project does not exist — ask the user to create it manually.
+        # Auto-creation via the SDK is brittle across SDK versions; the UI takes 30 seconds.
+        project_url = f"https://app.roboflow.com/{workspace_name}"
+        raise RuntimeError(
+            f"\n"
+            f"  Project '{project_name}' not found in workspace '{workspace_name}'.\n"
+            f"\n"
+            f"  Create it manually in 30 seconds:\n"
+            f"    1. Go to: {project_url}\n"
+            f"    2. Click 'Create New Project'\n"
+            f"    3. Set:\n"
+            f"         Name:         overhead-person-detection\n"
+            f"         Type:         Object Detection\n"
+            f"         Classes:      person_standing, person_sitting\n"
+            f"    4. Click 'Create Project' (do NOT upload images yet)\n"
+            f"\n"
+            f"  Then re-run:\n"
+            f"    python run_plan.py phase0 --video YOUR_VIDEO --roboflow-key YOUR_KEY "
+            f"--roboflow-workspace {workspace_name}\n"
+        )
 
     print(f"[phase0/step0.4] Uploading {len(sampled_frame_paths)} frames to batch 'coffee-shop-baseline'...")
 
