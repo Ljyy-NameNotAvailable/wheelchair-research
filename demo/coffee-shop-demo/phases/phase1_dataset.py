@@ -570,19 +570,18 @@ def write_dataset_summary(
 # ---------------------------------------------------------------------------
 
 def run(
-    roboflow_key: str,
+    roboflow_key: str = "",
+    no_roboflow: bool = False,
     skip_oxford: bool = False,
     state: dict | None = None,
 ) -> dict:
     """
     Run all Phase 1 steps in order.
 
-    Downloads a pre-annotated public overhead-person dataset from Roboflow
-    Universe (no project creation or annotation required), optionally combines
-    it with Oxford Town Centre, and builds a merged train/val split.
-
     Args:
-        roboflow_key:  Any valid Roboflow API key (free tier sufficient).
+        roboflow_key:  Roboflow API key (only needed when no_roboflow=False).
+        no_roboflow:   if True, skip Roboflow Universe download and use Oxford
+                       Town Centre only — no Roboflow account required.
         skip_oxford:   if True, skip Oxford Town Centre download.
         state:         current plan state dict (used to check phase0 completion).
 
@@ -595,10 +594,14 @@ def run(
     if state is not None:
         require_phase_done(0, state)
 
-    # Step 1.1 — download public Universe dataset (no annotation needed)
-    print("[phase1] Step 1.1 — Downloading public overhead-person dataset from Roboflow Universe...")
-    universe_dir = download_universe_dataset(roboflow_key)
-    print("[phase1] Step 1.1 — Done.")
+    # Step 1.1 — optionally download Roboflow Universe dataset
+    if no_roboflow:
+        print("[phase1] Step 1.1 — Skipping Roboflow Universe download (--no-roboflow).")
+        universe_dir = None
+    else:
+        print("[phase1] Step 1.1 — Downloading public overhead-person dataset from Roboflow Universe...")
+        universe_dir = download_universe_dataset(roboflow_key)
+        print("[phase1] Step 1.1 — Done.")
 
     # Step 1.2
     if skip_oxford:
@@ -608,14 +611,21 @@ def run(
         (oxford_dir / "images").mkdir(parents=True, exist_ok=True)
         (oxford_dir / "labels").mkdir(parents=True, exist_ok=True)
     else:
-        print("[phase1] Step 1.2 — Downloading Oxford Town Centre...")
+        print("[phase1] Step 1.2 — Downloading Oxford Town Centre (~700 MB from Oxford servers)...")
         download_oxford()
         oxford_dir = OXFORD_DIR
         print("[phase1] Step 1.2 — Done.")
 
-    # Step 1.3
-    print("[phase1] Step 1.3 — Merging datasets...")
-    merged_dir = merge_datasets(universe_dir, oxford_dir)
+    if universe_dir is None and not any((oxford_dir / "images").iterdir()):
+        raise RuntimeError(
+            "[phase1] No training data available — both Roboflow and Oxford Town Centre are empty."
+        )
+
+    # Step 1.3 — merge (or use whichever source is available)
+    print("[phase1] Step 1.3 — Building dataset...")
+    primary = universe_dir if universe_dir is not None else oxford_dir
+    secondary = oxford_dir if universe_dir is not None else None
+    merged_dir = merge_datasets(primary, secondary if secondary and any((secondary / "images").iterdir()) else oxford_dir)
     print("[phase1] Step 1.3 — Done.")
 
     # Step 1.4
@@ -624,7 +634,11 @@ def run(
     print("[phase1] Step 1.4 — Done.")
 
     # Summary report
-    summary_path = write_dataset_summary(universe_dir, oxford_dir, merged_dir)
+    summary_path = write_dataset_summary(
+        universe_dir if universe_dir else oxford_dir,
+        oxford_dir,
+        merged_dir,
+    )
 
     print_next_step(
         """

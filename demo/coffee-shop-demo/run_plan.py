@@ -125,6 +125,7 @@ def cmd_phase1(args: argparse.Namespace) -> None:
 
     outputs = phase1_dataset.run(
         roboflow_key=args.roboflow_key,
+        no_roboflow=args.no_roboflow,
         skip_oxford=args.skip_oxford,
         state=state,
     )
@@ -323,8 +324,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Download public overhead-person dataset from Roboflow Universe + Oxford Town Centre + merge.",
     )
     p1.add_argument(
-        "--roboflow-key", required=True,
-        help="Any valid Roboflow API key (free tier). Get one at app.roboflow.com → Settings → API Keys.",
+        "--roboflow-key", default="",
+        help="Roboflow API key (only needed without --no-roboflow).",
+    )
+    p1.add_argument(
+        "--no-roboflow", action="store_true",
+        help="Skip Roboflow Universe download entirely. Use Oxford Town Centre only.",
     )
     p1.add_argument(
         "--skip-oxford", action="store_true",
