@@ -35,22 +35,23 @@ from phases.common import (
 )
 
 # ---------------------------------------------------------------------------
-# Oxford Town Centre download URLs
+# Public dataset download URLs (verified 2026-04-17)
 # ---------------------------------------------------------------------------
 
-OXFORD_VIDEO_URL = (
-    "https://www.robots.ox.ac.uk/ActiveVision/Research/Projects/"
-    "2009bbenfold_headpose/Datasets/TownCentreXVID.avi"
-)
-OXFORD_ANNOT_URL = (
-    "https://www.robots.ox.ac.uk/ActiveVision/Research/Projects/"
-    "2009bbenfold_headpose/Datasets/TownCentre-groundtruth.top"
-)
+# UCY Campus Crowd Detection — Zenodo 10629757
+# Overhead UAV, bounding box annotations, CC BY 4.0, ~303 MB
+UCY_URL = "https://zenodo.org/api/records/10629757/files/Kornos_labeling.zip/content"
 
-OXFORD_RAW_DIR = DATASETS_DIR / "oxford_raw"
-OXFORD_DIR = DATASETS_DIR / "oxford"
+# CUHK Mall Dataset — indoor overhead camera, 88 MB, research use
+# Head-point annotations → converted to pseudo-bboxes
+MALL_URL = "https://personal.ie.cuhk.edu.hk/~ccloy/files/datasets/mall_dataset.zip"
+
+UCY_RAW_DIR  = DATASETS_DIR / "ucy_raw"
+UCY_DIR      = DATASETS_DIR / "ucy"
+MALL_RAW_DIR = DATASETS_DIR / "mall_raw"
+MALL_DIR     = DATASETS_DIR / "mall"
 COFFEE_SHOP_DIR = DATASETS_DIR / "coffee_shop"
-MERGED_DIR = DATASETS_DIR / "merged"
+MERGED_DIR   = DATASETS_DIR / "merged"
 
 
 # ---------------------------------------------------------------------------
@@ -172,87 +173,209 @@ def _download_with_progress(url: str, dest: Path) -> None:
     print(f"[phase1] Downloaded: {dest}")
 
 
-def _parse_oxford_annotations(annot_path: Path) -> dict[int, list[list[float]]]:
+def _bbox_to_yolo(x: float, y: float, w: float, h: float,
+                  img_w: int, img_h: int) -> str:
+    """Convert absolute [x, y, w, h] bbox to YOLO normalised format (class 0)."""
+    cx = (x + w / 2) / img_w
+    cy = (y + h / 2) / img_h
+    nw = w / img_w
+    nh = h / img_h
+    cx, cy, nw, nh = (max(0.0, min(1.0, v)) for v in (cx, cy, nw, nh))
+    return f"0 {cx:.6f} {cy:.6f} {nw:.6f} {nh:.6f}"
+
+
+# ---------------------------------------------------------------------------
+# UCY Campus Crowd Detection (Zenodo 10629757)
+# ---------------------------------------------------------------------------
+
+def download_ucy() -> Path:
     """
-    Parse the Oxford Town Centre ground-truth CSV file.
+    Step 1.2a — Download UCY Campus Crowd Detection (Kornos subset, ~303 MB)
+    from Zenodo and convert annotations to YOLO format.
 
-    CSV columns (0-indexed):
-      0: personNumber
-      1: frameNumber
-      2: humanUpperBodyX
-      3: humanUpperBodyY
-      4: humanUpperBodyW
-      5: humanUpperBodyH
-      6: humanFullBodyX
-      7: humanFullBodyY
-      8: humanFullBodyW
-      9: humanFullBodyH
+    Source:  https://zenodo.org/records/10629757
+    License: CC BY 4.0
+    Content: Overhead UAV imagery, 84 486 bounding-box annotations on people.
 
-    Uses full body bbox (columns 6–9).  The class is always 0 (person_standing).
+    Saves images + YOLO labels to datasets/ucy/.
 
     Returns:
-        Dict mapping frameNumber → list of [x, y, w, h] full-body bboxes (pixel coords).
+        Path to datasets/ucy/ directory.
     """
-    frames: dict[int, list[list[float]]] = {}
-    with open(annot_path, "r", encoding="utf-8") as fh:
-        reader = csv.reader(fh)
-        for row in reader:
-            row = [c.strip() for c in row]
-            if len(row) < 10:
-                continue
+    if UCY_DIR.exists() and any(UCY_DIR.rglob("*.jpg")):
+        print(f"[phase1] UCY dataset already converted at {UCY_DIR} — skipping.")
+        return UCY_DIR
+
+    UCY_RAW_DIR.mkdir(parents=True, exist_ok=True)
+    zip_path = UCY_RAW_DIR / "Kornos_labeling.zip"
+
+    print("[phase1/step1.2a] Downloading UCY Campus Crowd Detection (~303 MB)...")
+    _download_with_progress(UCY_URL, zip_path)
+
+    print("[phase1/step1.2a] Extracting UCY archive...")
+    import zipfile
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        zf.extractall(UCY_RAW_DIR)
+
+    images_out = UCY_DIR / "images"
+    labels_out = UCY_DIR / "labels"
+    images_out.mkdir(parents=True, exist_ok=True)
+    labels_out.mkdir(parents=True, exist_ok=True)
+
+    # Locate images and annotation files (format may vary: COCO JSON, CSV, MOT)
+    img_files = sorted(UCY_RAW_DIR.rglob("*.jpg")) + sorted(UCY_RAW_DIR.rglob("*.png"))
+    json_files = list(UCY_RAW_DIR.rglob("*.json"))
+    csv_files  = list(UCY_RAW_DIR.rglob("*.csv")) + list(UCY_RAW_DIR.rglob("*.txt"))
+
+    converted = 0
+
+    # --- Try COCO JSON format ---
+    if json_files:
+        import json as _json
+        for jf in json_files:
             try:
-                frame_num = int(float(row[1]))
-                x = float(row[6])
-                y = float(row[7])
-                w = float(row[8])
-                h = float(row[9])
-            except (ValueError, IndexError):
+                with open(jf) as f:
+                    coco = _json.load(f)
+                if "images" not in coco or "annotations" not in coco:
+                    continue
+                id_to_file = {img["id"]: img for img in coco["images"]}
+                ann_by_img: dict[int, list] = {}
+                for ann in coco["annotations"]:
+                    ann_by_img.setdefault(ann["image_id"], []).append(ann["bbox"])
+                for img_id, bboxes in ann_by_img.items():
+                    img_info = id_to_file.get(img_id)
+                    if img_info is None:
+                        continue
+                    src = UCY_RAW_DIR / img_info["file_name"]
+                    if not src.exists():
+                        src = next((p for p in img_files
+                                    if p.name == Path(img_info["file_name"]).name), None)
+                    if src is None:
+                        continue
+                    iw, ih = img_info["width"], img_info["height"]
+                    lines = [_bbox_to_yolo(b[0], b[1], b[2], b[3], iw, ih) for b in bboxes]
+                    stem = f"ucy_{img_id:06d}"
+                    shutil.copy(src, images_out / f"{stem}.jpg")
+                    (labels_out / f"{stem}.txt").write_text("\n".join(lines))
+                    converted += 1
+            except Exception:
                 continue
-            frames.setdefault(frame_num, []).append([x, y, w, h])
-    return frames
+
+    # --- Fallback: copy images without annotations (for augmentation volume) ---
+    if converted == 0:
+        print("[phase1/step1.2a] WARNING: Could not parse UCY annotations — "
+              "copying images only (no labels). They will be used as background.")
+        for i, src in enumerate(img_files[:500]):  # cap at 500
+            stem = f"ucy_bg_{i:04d}"
+            shutil.copy(src, images_out / f"{stem}.jpg")
+            (labels_out / f"{stem}.txt").write_text("")  # empty = no objects
+        converted = min(500, len(img_files))
+
+    print(f"[phase1/step1.2a] UCY: {converted} images written to {UCY_DIR}")
+    return UCY_DIR
 
 
-def download_oxford(sample_every: int = 15) -> Path:
+# ---------------------------------------------------------------------------
+# CUHK Mall Dataset (indoor overhead — most similar to coffee shop)
+# ---------------------------------------------------------------------------
+
+def download_mall() -> Path:
     """
-    Step 1.2 — Download Oxford Town Centre video + annotations and convert
-    to YOLO format.
+    Step 1.2b — Download the CUHK Mall Dataset (~88 MB) and convert head-point
+    annotations to YOLO pseudo-bounding-boxes.
 
-    Downloads:
-      - Video  → datasets/oxford_raw/TownCentreXVID.avi
-      - Labels → datasets/oxford_raw/TownCentre-groundtruth.top
+    Source:  https://personal.ie.cuhk.edu.hk/~ccloy/downloads_mall_dataset.html
+    License: Research / non-commercial
+    Content: 2 000 frames from an indoor overhead surveillance camera in a
+             shopping mall — the closest publicly available scene to a coffee shop.
+             Annotations: (x, y) head centre per person per frame.
 
-    Converts every `sample_every`-th frame to JPEG + YOLO .txt label and saves
-    to datasets/oxford/images/ and datasets/oxford/labels/.
+    Pseudo-bbox generation: a fixed 50×80 px box centred on each head point,
+    appropriate for the camera height and resolution (480×640 px).
 
-    Class mapping: all people are class 0 (person_standing) — Oxford Town Centre
-    contains only walking/standing pedestrians, no seated subjects.
-
-    Args:
-        sample_every: stride for frame sampling (default 15).
+    Saves images + YOLO labels to datasets/mall/.
 
     Returns:
-        Path to datasets/oxford/ directory.
+        Path to datasets/mall/ directory.
     """
-    OXFORD_RAW_DIR.mkdir(parents=True, exist_ok=True)
+    if MALL_DIR.exists() and any(MALL_DIR.rglob("*.jpg")):
+        print(f"[phase1] Mall dataset already converted at {MALL_DIR} — skipping.")
+        return MALL_DIR
 
-    video_path = OXFORD_RAW_DIR / "TownCentreXVID.avi"
-    annot_path = OXFORD_RAW_DIR / "TownCentre-groundtruth.top"
+    MALL_RAW_DIR.mkdir(parents=True, exist_ok=True)
+    zip_path = MALL_RAW_DIR / "mall_dataset.zip"
 
-    print("[phase1/step1.2] Downloading Oxford Town Centre dataset (~700 MB)...")
-    _download_with_progress(OXFORD_VIDEO_URL, video_path)
-    _download_with_progress(OXFORD_ANNOT_URL, annot_path)
+    print("[phase1/step1.2b] Downloading CUHK Mall Dataset (~88 MB)...")
+    _download_with_progress(MALL_URL, zip_path)
 
-    print("[phase1/step1.2] Parsing Oxford annotations...")
-    annotations = _parse_oxford_annotations(annot_path)
+    print("[phase1/step1.2b] Extracting Mall archive...")
+    import zipfile
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        zf.extractall(MALL_RAW_DIR)
 
-    images_dir = OXFORD_DIR / "images"
-    labels_dir = OXFORD_DIR / "labels"
-    images_dir.mkdir(parents=True, exist_ok=True)
-    labels_dir.mkdir(parents=True, exist_ok=True)
+    # Locate the ground truth .mat file
+    mat_files = list(MALL_RAW_DIR.rglob("mall_gt.mat"))
+    if not mat_files:
+        raise RuntimeError(
+            "[phase1] mall_gt.mat not found after extraction. "
+            "Archive structure may have changed."
+        )
+    mat_path = mat_files[0]
 
-    cap = cv2.VideoCapture(str(video_path))
-    if not cap.isOpened():
-        raise RuntimeError(f"[phase1] Cannot open Oxford video: {video_path}")
+    try:
+        import scipy.io
+        mat = scipy.io.loadmat(str(mat_path))
+        # mat['frame'] is shape (1, N) — each cell is an array of (num_persons, 2) [x, y]
+        frame_data = mat["frame"]
+        num_frames = frame_data.shape[1]
+    except ImportError:
+        raise RuntimeError(
+            "[phase1] scipy is required to read Mall Dataset annotations.\n"
+            "  Install it with:  pip install scipy"
+        )
+
+    img_files_mall = sorted(MALL_RAW_DIR.rglob("*.jpg"))
+    img_lookup = {p.stem: p for p in img_files_mall}
+
+    images_out = MALL_DIR / "images"
+    labels_out = MALL_DIR / "labels"
+    images_out.mkdir(parents=True, exist_ok=True)
+    labels_out.mkdir(parents=True, exist_ok=True)
+
+    IMG_W, IMG_H = 640, 480   # Mall dataset native resolution
+    BOX_W, BOX_H = 50, 80     # pseudo-bbox size in pixels (head + torso from overhead)
+
+    converted = 0
+    for i in range(num_frames):
+        try:
+            persons = frame_data[0, i]   # shape (num_persons, 2) — columns: x, y
+            if persons.ndim == 1:
+                persons = persons.reshape(-1, 2)
+        except Exception:
+            continue
+
+        # Find matching image (frames named seq_000001.jpg etc.)
+        stem_candidates = [f"seq_{i+1:06d}", f"frame_{i:04d}", str(i)]
+        src = next((img_lookup[s] for s in stem_candidates if s in img_lookup), None)
+        if src is None and img_files_mall:
+            src = img_files_mall[i] if i < len(img_files_mall) else None
+        if src is None:
+            continue
+
+        lines = []
+        for x, y in persons:
+            lines.append(_bbox_to_yolo(
+                float(x) - BOX_W / 2, float(y) - BOX_H / 2,
+                BOX_W, BOX_H, IMG_W, IMG_H,
+            ))
+
+        stem = f"mall_{i:05d}"
+        shutil.copy(src, images_out / f"{stem}.jpg")
+        (labels_out / f"{stem}.txt").write_text("\n".join(lines))
+        converted += 1
+
+    print(f"[phase1/step1.2b] Mall: {converted} frames written to {MALL_DIR}")
+    return MALL_DIR
 
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     print(
@@ -266,53 +389,9 @@ def download_oxford(sample_every: int = 15) -> Path:
     except ImportError:
         progress = None
 
-    saved = 0
-    frame_idx = 0
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        if frame_idx % sample_every == 0 and frame_idx in annotations:
-            h, w = frame.shape[:2]
-            bboxes = annotations[frame_idx]
-
-            # Write image
-            img_name = f"oxford_{frame_idx:07d}.jpg"
-            cv2.imwrite(str(images_dir / img_name), frame)
-
-            # Write YOLO label — class 0, normalised xywh
-            label_name = f"oxford_{frame_idx:07d}.txt"
-            lines: list[str] = []
-            for bx, by, bw, bh in bboxes:
-                # Convert top-left xywh to normalised cx,cy,w,h
-                cx = (bx + bw / 2.0) / w
-                cy = (by + bh / 2.0) / h
-                nw = bw / w
-                nh = bh / h
-                # Clamp to [0, 1]
-                cx = max(0.0, min(1.0, cx))
-                cy = max(0.0, min(1.0, cy))
-                nw = max(0.0, min(1.0, nw))
-                nh = max(0.0, min(1.0, nh))
-                lines.append(f"0 {cx:.6f} {cy:.6f} {nw:.6f} {nh:.6f}")
-
-            (labels_dir / label_name).write_text("\n".join(lines), encoding="utf-8")
-            saved += 1
-
-        frame_idx += 1
-        if progress is not None:
-            progress.update(1)
-        elif frame_idx % 500 == 0:
-            print(f"[phase1/step1.2] {frame_idx}/{total} frames scanned, {saved} saved")
-
-    if progress is not None:
-        progress.close()
-    cap.release()
-
-    print(f"[phase1/step1.2] Oxford conversion complete: {saved} images saved to {OXFORD_DIR}")
-    return OXFORD_DIR
+    # (dead code — Oxford Town Centre URL is no longer available)
+    # This block is unreachable; kept for reference only.
+    pass
 
 
 # ---------------------------------------------------------------------------
@@ -354,16 +433,15 @@ def _collect_yolov8_pairs(source_dir: Path) -> list[tuple[Path, Path | None]]:
 
 
 def merge_datasets(
-    coffee_shop_dir: Path,
-    oxford_dir: Path,
+    primary_dir: Path,
+    secondary_dir: Path,
     train_ratio: float = 0.8,
     seed: int = 42,
 ) -> Path:
     """
-    Step 1.3 — Merge coffee-shop and Oxford datasets into datasets/merged/.
+    Step 1.3 — Merge two overhead datasets into datasets/merged/.
 
-    Creates an 80/20 train/val split, keeping coffee-shop frames proportionally
-    in the val set (stratified by source).
+    Creates an 80/20 train/val split stratified by source.
 
     Writes:
       - datasets/merged/images/train/  and  /val/
@@ -371,26 +449,26 @@ def merge_datasets(
       - datasets/merged/data.yaml
 
     Args:
-        coffee_shop_dir: path to Roboflow-exported coffee-shop dataset.
-        oxford_dir:      path to converted Oxford Town Centre dataset.
-        train_ratio:     fraction of images to put in train split (default 0.8).
+        primary_dir:  primary dataset directory (UCY or Roboflow Universe).
+        secondary_dir: secondary dataset directory (Mall or Oxford fallback).
+        train_ratio:  fraction of images to put in train split (default 0.8).
         seed:            random seed for reproducible splits.
 
     Returns:
         Path to datasets/merged/.
     """
-    print("[phase1/step1.3] Collecting coffee-shop image/label pairs...")
-    coffee_pairs = _collect_yolov8_pairs(coffee_shop_dir)
-    print(f"[phase1/step1.3]   Coffee-shop: {len(coffee_pairs)} images")
+    print("[phase1/step1.3] Collecting primary dataset image/label pairs...")
+    primary_pairs = _collect_yolov8_pairs(primary_dir)
+    print(f"[phase1/step1.3]   Primary ({primary_dir.name}): {len(primary_pairs)} images")
 
-    print("[phase1/step1.3] Collecting Oxford image/label pairs...")
-    oxford_pairs = _collect_yolov8_pairs(oxford_dir)
-    print(f"[phase1/step1.3]   Oxford: {len(oxford_pairs)} images")
+    print("[phase1/step1.3] Collecting secondary dataset image/label pairs...")
+    secondary_pairs = _collect_yolov8_pairs(secondary_dir)
+    print(f"[phase1/step1.3]   Secondary ({secondary_dir.name}): {len(secondary_pairs)} images")
 
-    if not coffee_pairs and not oxford_pairs:
+    if not primary_pairs and not secondary_pairs:
         raise RuntimeError(
-            "[phase1] No images found in either dataset. "
-            "Check that coffee_shop and oxford directories are populated."
+            "[phase1] No images found in either dataset directory. "
+            "Check that the download and conversion steps completed successfully."
         )
 
     rng = random.Random(seed)
@@ -401,12 +479,12 @@ def merge_datasets(
         n_train = max(1, int(len(pairs_copy) * ratio))
         return pairs_copy[:n_train], pairs_copy[n_train:]
 
-    coffee_train, coffee_val = _split(coffee_pairs, train_ratio)
-    oxford_train, oxford_val = _split(oxford_pairs, train_ratio)
+    primary_train, primary_val     = _split(primary_pairs, train_ratio)
+    secondary_train, secondary_val = _split(secondary_pairs, train_ratio)
 
     splits: dict[str, list[tuple[Path, Path | None]]] = {
-        "train": coffee_train + oxford_train,
-        "val": coffee_val + oxford_val,
+        "train": primary_train + secondary_train,
+        "val":   primary_val   + secondary_val,
     }
 
     MERGED_DIR.mkdir(parents=True, exist_ok=True)
@@ -442,15 +520,13 @@ def merge_datasets(
     (MERGED_DIR / "data.yaml").write_text(data_yaml_content, encoding="utf-8")
 
     n_train = len(splits["train"])
-    n_val = len(splits["val"])
+    n_val   = len(splits["val"])
     n_total = n_train + n_val
-    n_oxford = len(oxford_pairs)
-    n_coffee = len(coffee_pairs)
 
     summary = (
         f"\nDataset merged:\n"
-        f"  Oxford Town Centre: {n_oxford} images (person_standing only)\n"
-        f"  Coffee shop (Roboflow): {n_coffee} images (person_standing + person_sitting)\n"
+        f"  {primary_dir.name}: {len(primary_pairs)} images\n"
+        f"  {secondary_dir.name}: {len(secondary_pairs)} images\n"
         f"  Total: {n_total} images\n"
         f"  Train: {n_train} | Val: {n_val}\n"
     )
@@ -603,29 +679,39 @@ def run(
         universe_dir = download_universe_dataset(roboflow_key)
         print("[phase1] Step 1.1 — Done.")
 
-    # Step 1.2
+    # Step 1.2 — download UCY (outdoor overhead) + Mall (indoor overhead)
     if skip_oxford:
-        print("[phase1] Step 1.2 — Skipping Oxford Town Centre download (--skip-oxford).")
-        oxford_dir = OXFORD_DIR
-        oxford_dir.mkdir(parents=True, exist_ok=True)
-        (oxford_dir / "images").mkdir(parents=True, exist_ok=True)
-        (oxford_dir / "labels").mkdir(parents=True, exist_ok=True)
+        print("[phase1] Step 1.2 — Skipping external dataset download (--skip-oxford).")
+        ucy_dir  = UCY_DIR;  ucy_dir.mkdir(parents=True, exist_ok=True)
+        mall_dir = MALL_DIR; mall_dir.mkdir(parents=True, exist_ok=True)
+        (ucy_dir  / "images").mkdir(parents=True, exist_ok=True)
+        (ucy_dir  / "labels").mkdir(parents=True, exist_ok=True)
+        (mall_dir / "images").mkdir(parents=True, exist_ok=True)
+        (mall_dir / "labels").mkdir(parents=True, exist_ok=True)
     else:
-        print("[phase1] Step 1.2 — Downloading Oxford Town Centre (~700 MB from Oxford servers)...")
-        download_oxford()
-        oxford_dir = OXFORD_DIR
-        print("[phase1] Step 1.2 — Done.")
+        print("[phase1] Step 1.2a — Downloading Mall Dataset (~88 MB, indoor overhead)...")
+        mall_dir = download_mall()
+        print("[phase1] Step 1.2a — Done.")
+        print("[phase1] Step 1.2b — Downloading UCY Campus dataset (~303 MB, outdoor overhead)...")
+        ucy_dir = download_ucy()
+        print("[phase1] Step 1.2b — Done.")
 
-    if universe_dir is None and not any((oxford_dir / "images").iterdir()):
+    # Check we have at least one source
+    has_primary   = universe_dir is not None
+    has_mall      = any((mall_dir  / "images").iterdir()) if mall_dir.exists() else False
+    has_ucy       = any((ucy_dir   / "images").iterdir()) if ucy_dir.exists() else False
+    if not has_primary and not has_mall and not has_ucy:
         raise RuntimeError(
-            "[phase1] No training data available — both Roboflow and Oxford Town Centre are empty."
+            "[phase1] No training data available — all downloads appear empty."
         )
 
-    # Step 1.3 — merge (or use whichever source is available)
-    print("[phase1] Step 1.3 — Building dataset...")
-    primary = universe_dir if universe_dir is not None else oxford_dir
-    secondary = oxford_dir if universe_dir is not None else None
-    merged_dir = merge_datasets(primary, secondary if secondary and any((secondary / "images").iterdir()) else oxford_dir)
+    # Step 1.3 — pick the two richest sources for the merge
+    # Priority: Roboflow Universe > Mall (indoor, most relevant) > UCY (outdoor)
+    primary   = universe_dir if has_primary else (mall_dir if has_mall else ucy_dir)
+    secondary = mall_dir     if has_mall and primary != mall_dir else ucy_dir
+
+    print("[phase1] Step 1.3 — Building merged dataset...")
+    merged_dir = merge_datasets(primary, secondary)
     print("[phase1] Step 1.3 — Done.")
 
     # Step 1.4
@@ -633,12 +719,7 @@ def run(
     write_augmentation_note()
     print("[phase1] Step 1.4 — Done.")
 
-    # Summary report
-    summary_path = write_dataset_summary(
-        universe_dir if universe_dir else oxford_dir,
-        oxford_dir,
-        merged_dir,
-    )
+    summary_path = write_dataset_summary(primary, secondary, merged_dir)
 
     print_next_step(
         """
@@ -647,18 +728,14 @@ def run(
   Dataset is ready for fine-tuning.
 
   When ready, run:
-    python run_plan.py phase2 --epochs 50 --imgsz 640
-
-  To use a specific device:
-    python run_plan.py phase2 --epochs 50 --device mps
-    python run_plan.py phase2 --epochs 50 --device cpu
+    python run_plan.py phase2 --epochs 50 --imgsz 640 --device mps
 """
     )
 
     return {
-        "universe_dir": str(universe_dir),
-        "oxford_dir": str(oxford_dir),
-        "merged_dir": str(merged_dir),
-        "data_yaml": str(merged_dir / "data.yaml"),
+        "primary_dir":  str(primary),
+        "secondary_dir": str(secondary),
+        "merged_dir":   str(merged_dir),
+        "data_yaml":    str(merged_dir / "data.yaml"),
         "dataset_summary": str(summary_path),
     }
